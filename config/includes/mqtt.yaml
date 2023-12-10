@@ -1,58 +1,85 @@
 sensor:
+  # Vitocal 250 - Allgemein
   - name: "Open3E Vorlauftemperatur"
     state_topic: "open3e/268_FlowTemperatureSensor/Actual"
+    unique_id: vitocal_flowtemp
     device_class: temperature
     state_class: measurement
+    icon: mdi:thermometer
     unit_of_measurement: "°C"
-    unique_id: vitocal_flowtemp
+
   - name: "Open3E Rücklauftemperatur"
     state_topic: "open3e/269_ReturnTemperatureSensor/Actual"
+    unique_id: vitocal_returntemp
     device_class: temperature
     state_class: measurement
+    icon: mdi:thermometer
     unit_of_measurement: "°C"
-    unique_id: vitocal_returntemp
+
   - name: "Open3E Außentemperatur"
     state_topic: "open3e/274_OutsideTemperatureSensor/Actual"
+    unique_id: vitocal_outsidetemp
     device_class: temperature
     state_class: measurement
+    icon: mdi:thermometer
     unit_of_measurement: "°C"
-    unique_id: vitocal_outsidetemp
+
+  - name: "Open3E Verflüssiger Temperatur"
+    state_topic: "open3e/2333_EconomizerLiquidTemperatureSensor/Actual"
+    unique_id: 2333_EconomizerLiquidTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Open3E Verdampfer Temperatur"
+    state_topic: "open3e/2334_EvaporatorVaporTemperatureSensor/Actual"
+    unique_id: 2334_EvaporatorVaporTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Open3E Leistungsaufnahme Zusatzheizung"
+    state_topic: "open3e/2487_CurrentElectricalPowerConsumptionElectricHeater"
+    unique_id: 2487_CurrentElectricalPowerConsumptionElectricHeater
+    device_class: power
+    state_class: measurement
+    icon: mdi:transmission-tower-export
+    unit_of_measurement: "W"
+
+  - name: "Open3E Leistungsaufnahme Wärmepumpe"
+    state_topic: "open3e/2488_CurrentElectricalPowerConsumptionSystem"
+    unique_id: 2488_CurrentElectricalPowerConsumptionSystem
+    device_class: power
+    state_class: measurement
+    icon: mdi:transmission-tower-export
+    unit_of_measurement: "W"
+
+  - name: "Open3E Thermische Leistung"
+    state_topic: open3e/2496_CurrentThermalCapacitySystem
+    unique_id: 2496_CurrentThermalCapacitySystem
+    device_class: power
+    state_class: measurement
+    icon: mdi:radiator
+    unit_of_measurement: "W"
+
+  - name: "Open3E Heizwasser-Pufferspeicher Temperature"
+    state_topic: "open3e/3016_HeatingBufferTemperatureSensor/Actual"
+    unique_id: 3016_vitocal_HeatingBufferTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  # Vitocal 250 - Heizkreis 1
   - name: "Open3E HK1 Vorlauftemperatur"
     state_topic: "open3e/284_MixerOneCircuitFlowTemperatureSensor/Actual"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
     unique_id: vitocal_hk1_flowtemp
-  - name: "Open3E HK2 Vorlauftemperatur"
-    state_topic: "open3e/286_MixerTwoCircuitFlowTemperatureSensor/Actual"
     device_class: temperature
     state_class: measurement
     unit_of_measurement: "°C"
-    unique_id: vitocal_hk2_flowtemp
-  - name: "Open3E Kompressor Einlauf Temperatur"
-    state_topic: "open3e/321_CompressorInletTemperatureSensor/Actual"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    unique_id: vitocal_compressorinlettemp
-  - name: "Open3E Kompressor Einlauf Druck"
-    state_topic: "open3e/322_CompressorInletPressureSensor/Actual"
-    device_class: pressure
-    state_class: measurement
-    unit_of_measurement: "bar"
-    unique_id: vitocal_compressorinletpressure
-  - name: "Open3E Kompressor Auslauf Temperatur"
-    state_topic: "open3e/324_CompressorOutletTemperatureSensor/Actual"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    unique_id: vitocal_compressoroutlettemp
-  - name: "Open3E Kompressor Auslauf Druck"
-    state_topic: "open3e/325_CompressorOutletPressureSensor/Actual"
-    device_class: pressure
-    state_class: measurement
-    unit_of_measurement: "bar"
-    unique_id: vitocal_compressoroutletpressure
+
   - name: "Open3E HK1 Status Pumpe"
     state_topic: "open3e/401_MixerOneCircuitPump"
     unique_id: vitocal_hk1_pumpstatus
@@ -62,37 +89,20 @@ sensor:
       {% else %}
         {{ "Aus"}}
       {% endif %}
-  - name: "Open3E HK2 Status Pumpe"
-    state_topic: "open3e/402_MixerTwoCircuitPump"
-    unique_id: vitocal_hk2_pumpstatus
-    value_template: >
-      {% if value=="1.0" %}
-        {{ "An" }}
-      {% else %}
-        {{ "Aus"}}
-      {% endif %}
+
   - name: "Open3E HK1 Position Mischventil"
     state_topic: "open3e/475_MixerOneCircuitThreeWayValvePositionPercent"
     unique_id: vitocal_hk1_valveposition
     value_template: >
       {{ float(value) / 100 }}
-  - name: "Open3E HK2 Position Mischventil"
-    state_topic: "open3e/476_MixerTwoCircuitThreeWayValvePositionPercent"
-    unique_id: vitocal_hk2_valveposition
-    value_template: >
-      {{ float(value) / 100 }}
+
   - name: "Open3E HK1 Vorlauftemperatur Sollwert"
     state_topic: "open3e/987_MixerOneCircuitFlowTemperatureTargetSetpoint"
     device_class: temperature
     state_class: measurement
     unit_of_measurement: "°C"
     unique_id: vitocal_hk1_flowtemptarget
-  - name: "Open3E HK2 Vorlauftemperatur Sollwert"
-    state_topic: "open3e/988_MixerTwoCircuitFlowTemperatureTargetSetpoint"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    unique_id: vitocal_hk2_flowtemptarget
+
   - name: "Open3E HK1 Betriebsprogramm"
     state_topic: "open3e/1415_MixerOneCircuitOperationState/State"
     unique_id: vitocal_hk1_operationstate
@@ -119,6 +129,45 @@ sensor:
       {% else %}
         {{ value }}
       {% endif %}
+
+  - name: "Open3E HK1 Solltemperatur"
+    state_topic: "open3e/1643_MixerOneCircuitCurrentTemperatureSetpoint"
+    unique_id: vitocal_hk1_targettemp
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  # Vitocal 250 - Heizkreis 2
+  - name: "Open3E HK2 Vorlauftemperatur"
+    state_topic: "open3e/286_MixerTwoCircuitFlowTemperatureSensor/Actual"
+    unique_id: vitocal_hk2_flowtemp
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  - name: "Open3E HK2 Status Pumpe"
+    state_topic: "open3e/402_MixerTwoCircuitPump"
+    unique_id: vitocal_hk2_pumpstatus
+    value_template: >
+      {% if value=="1.0" %}
+        {{ "An" }}
+      {% else %}
+        {{ "Aus"}}
+      {% endif %}
+
+  - name: "Open3E HK2 Position Mischventil"
+    state_topic: "open3e/476_MixerTwoCircuitThreeWayValvePositionPercent"
+    unique_id: vitocal_hk2_valveposition
+    value_template: >
+      {{ float(value) / 100 }}
+
+  - name: "Open3E HK2 Vorlauftemperatur Sollwert"
+    state_topic: "open3e/988_MixerTwoCircuitFlowTemperatureTargetSetpoint"
+    unique_id: vitocal_hk2_flowtemptarget
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
   - name: "Open3E HK2 Betriebsprogramm"
     state_topic: "open3e/1416_MixerTwoCircuitOperationState/State"
     unique_id: vitocal_hk2_operationstate
@@ -145,18 +194,51 @@ sensor:
       {% else %}
         {{ value }}
       {% endif %}
-  - name: "Open3E HK1 Solltemperatur"
-    state_topic: "open3e/1643_MixerOneCircuitCurrentTemperatureSetpoint"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    unique_id: vitocal_hk1_targettemp
+
   - name: "Open3E HK2 Solltemperatur"
     state_topic: "open3e/1644_MixerTwoCircuitCurrentTemperatureSetpoint"
+    unique_id: vitocal_hk2_targettemp
     device_class: temperature
     state_class: measurement
     unit_of_measurement: "°C"
-    unique_id: vitocal_hk2_targettemp
+
+  # Vitocal 250 - Kompressor
+  - name: "Open3E Kompressor Einlauf Temperatur"
+    state_topic: "open3e/321_CompressorInletTemperatureSensor/Actual"
+    unique_id: vitocal_compressorinlettemp
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  - name: "Open3E Kompressor Einlauf Druck"
+    state_topic: "open3e/322_CompressorInletPressureSensor/Actual"
+    unique_id: vitocal_compressorinletpressure
+    device_class: pressure
+    state_class: measurement
+    unit_of_measurement: "bar"
+
+  - name: "Open3E Kompressor Auslauf Temperatur"
+    state_topic: "open3e/324_CompressorOutletTemperatureSensor/Actual"
+    unique_id: vitocal_compressoroutlettemp
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+
+  - name: "Open3E Kompressor Auslauf Druck"
+    state_topic: "open3e/325_CompressorOutletPressureSensor/Actual"
+    unique_id: vitocal_compressoroutletpressure
+    device_class: pressure
+    state_class: measurement
+    unit_of_measurement: "bar"
+
+  - name: "Open3E Kompressor Drehzahl Prozent"
+    state_topic: open3e/2346_CompressorSpeedPercent
+    unique_id: 2346_CompressorSpeedPercent
+    device_class: speed
+    state_class: measurement
+    icon: mdi:fan
+    unit_of_measurement: "%"
+
   - name: "Open3E Kompressor Status"
     state_topic: "open3e/2351_HeatPumpCompressor"
     unique_id: vitocal_compressorstatus
@@ -166,14 +248,18 @@ sensor:
       {% else %}
         {{ "Aus"}}
       {% endif %}
+
   - name: "Open3E Kompressor Starts"
     state_topic: "open3e/2369_HeatPumpCompressorStatistical/starts"
     unique_id: vitocal_compressorstarts
+
   - name: "Open3E Kompressor Betriebsstunden"
     state_topic: "open3e/2369_HeatPumpCompressorStatistical/hours"
     unique_id: vitocal_compressorhours
+
   - name: "Open3E Kompressor Drehzahl"
     state_topic: "open3e/2569_CompressorSpeedRps"
-    device_class: speed
-    unit_of_measurement: "rps"
     unique_id: vitocal_compressorspeed
+    device_class: speed
+    icon: mdi:fan
+    unit_of_measurement: "rps"
