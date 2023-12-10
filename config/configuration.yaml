@@ -1,0 +1,4 @@
+
+modbus: !include includes/modbus.yaml
+notify: !include includes/notify.yaml
+mqtt: !include includes/mqtt.yaml
