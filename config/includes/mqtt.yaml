@@ -114,7 +114,7 @@ sensor:
         {{ "Reduziert" }}
       {% elif ostate==2 %}
         {{ "Normal" }}
-      {% elif ostate==1 %}
+      {% elif ostate==3 %}
         {{ "Komfort" }}
       {% elif ostate==4 %}
         {{ "Festwert" }}
@@ -179,7 +179,7 @@ sensor:
         {{ "Reduziert" }}
       {% elif ostate==2 %}
         {{ "Normal" }}
-      {% elif ostate==1 %}
+      {% elif ostate==3 %}
         {{ "Komfort" }}
       {% elif ostate==4 %}
         {{ "Festwert" }}
