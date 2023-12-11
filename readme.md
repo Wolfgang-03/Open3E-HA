@@ -12,9 +12,12 @@ Further information can be found here:
 
 At the moment I have limited myself to a few data points to illustrate the principle. I start the Open3E client with the following call: 
 
-    python3 Open3Eclient.py -c can0 -dev vcal -r 268,269,274,284,286,318,320,321,322,324,325,381,401,402,475,476,880,881,901,902,987,988,1415,1416,1643,1644,2346,2351,2352,2369,2370,2487,2569 -v -muser MyHaUsername:MyHaPassword -m 192.168.xxx.xxx:1883:open3e -mfstr "{didNumber}_{didName}" -t 30
+    python3 Open3Eclient.py @args.txt
+
+    -> args.txt : The following values must be adjusted: --mqtt (ip), --mqttuser (username and password)
 
 I then have the data points in the MQTT server with this structure:
 
-    open3e/274_OutsideTemperatureSensor/Actual
+    open3e/680_274_OutsideTemperatureSensor/Actual
 
+In HA, I have created a folder "includes", which then contains various yaml files, including the modbus.yaml, notify.yaml and mqtt.yaml mentioned above. 

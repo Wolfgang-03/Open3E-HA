@@ -1,247 +1,135 @@
 sensor:
   # Vitocal 250 - Allgemein
-  - name: "Open3E Vorlauftemperatur"
-    state_topic: "open3e/268_FlowTemperatureSensor/Actual"
-    unique_id: vitocal_flowtemp
+  - name: "Vitocal Vorlauftemperatur"
+    state_topic: "open3e/680_268_FlowTemperatureSensor/Actual"
+    unique_id: 680_268_FlowTemperatureSensor
     device_class: temperature
     state_class: measurement
     icon: mdi:thermometer
     unit_of_measurement: "°C"
 
-  - name: "Open3E Rücklauftemperatur"
-    state_topic: "open3e/269_ReturnTemperatureSensor/Actual"
-    unique_id: vitocal_returntemp
+  - name: "Vitocal Rücklauftemperatur"
+    state_topic: "open3e/680_269_ReturnTemperatureSensor/Actual"
+    unique_id: 680_269_ReturnTemperatureSensor
     device_class: temperature
     state_class: measurement
     icon: mdi:thermometer
     unit_of_measurement: "°C"
 
-  - name: "Open3E Außentemperatur"
-    state_topic: "open3e/274_OutsideTemperatureSensor/Actual"
-    unique_id: vitocal_outsidetemp
+  - name: "Vitocal Außentemperatur"
+    state_topic: "open3e/680_274_OutsideTemperatureSensor/Actual"
+    unique_id: 680_274_OutsideTemperatureSensor
     device_class: temperature
     state_class: measurement
     icon: mdi:thermometer
     unit_of_measurement: "°C"
 
-  - name: "Open3E Verflüssiger Temperatur"
-    state_topic: "open3e/2333_EconomizerLiquidTemperatureSensor/Actual"
-    unique_id: 2333_EconomizerLiquidTemperatureSensor
-    state_class: measurement
-    device_class: temperature
-    icon: mdi:thermometer
-    unit_of_measurement: "°C"
-
-  - name: "Open3E Verdampfer Temperatur"
-    state_topic: "open3e/2334_EvaporatorVaporTemperatureSensor/Actual"
-    unique_id: 2334_EvaporatorVaporTemperatureSensor
-    state_class: measurement
-    device_class: temperature
-    icon: mdi:thermometer
-    unit_of_measurement: "°C"
-
-  - name: "Open3E Leistungsaufnahme Zusatzheizung"
-    state_topic: "open3e/2487_CurrentElectricalPowerConsumptionElectricHeater"
-    unique_id: 2487_CurrentElectricalPowerConsumptionElectricHeater
-    device_class: power
-    state_class: measurement
-    icon: mdi:transmission-tower-export
-    unit_of_measurement: "W"
-
-  - name: "Open3E Leistungsaufnahme Wärmepumpe"
-    state_topic: "open3e/2488_CurrentElectricalPowerConsumptionSystem"
-    unique_id: 2488_CurrentElectricalPowerConsumptionSystem
-    device_class: power
-    state_class: measurement
-    icon: mdi:transmission-tower-export
-    unit_of_measurement: "W"
-
-  - name: "Open3E Thermische Leistung"
-    state_topic: open3e/2496_CurrentThermalCapacitySystem
-    unique_id: 2496_CurrentThermalCapacitySystem
-    device_class: power
-    state_class: measurement
-    icon: mdi:radiator
-    unit_of_measurement: "W"
-
-  - name: "Open3E Heizwasser-Pufferspeicher Temperature"
-    state_topic: "open3e/3016_HeatingBufferTemperatureSensor/Actual"
-    unique_id: 3016_vitocal_HeatingBufferTemperatureSensor
-    device_class: temperature
-    state_class: measurement
-    icon: mdi:thermometer
-    unit_of_measurement: "°C"
-
-  # Vitocal 250 - Heizkreis 1
-  - name: "Open3E HK1 Vorlauftemperatur"
-    state_topic: "open3e/284_MixerOneCircuitFlowTemperatureSensor/Actual"
-    unique_id: vitocal_hk1_flowtemp
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  - name: "Open3E HK1 Status Pumpe"
-    state_topic: "open3e/401_MixerOneCircuitPump"
-    unique_id: vitocal_hk1_pumpstatus
-    value_template: >
-      {% if value=="1.0" %}
-        {{ "An" }}
-      {% else %}
-        {{ "Aus"}}
-      {% endif %}
-
-  - name: "Open3E HK1 Position Mischventil"
-    state_topic: "open3e/475_MixerOneCircuitThreeWayValvePositionPercent"
-    unique_id: vitocal_hk1_valveposition
-    value_template: >
-      {{ float(value) / 100 }}
-
-  - name: "Open3E HK1 Vorlauftemperatur Sollwert"
-    state_topic: "open3e/987_MixerOneCircuitFlowTemperatureTargetSetpoint"
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-    unique_id: vitocal_hk1_flowtemptarget
-
-  - name: "Open3E HK1 Betriebsprogramm"
-    state_topic: "open3e/1415_MixerOneCircuitOperationState/State"
-    unique_id: vitocal_hk1_operationstate
-    value_template: >
-      {% set ostate = int(value) %}
-      {% if ostate==0 %}
-        {{ "Abschaltbetrieb" }}
-      {% elif ostate==1 %}
-        {{ "Reduziert" }}
-      {% elif ostate==2 %}
-        {{ "Normal" }}
-      {% elif ostate==3 %}
-        {{ "Komfort" }}
-      {% elif ostate==4 %}
-        {{ "Festwert" }}
-      {% elif ostate==5 %}
-        {{ "Frostschutz" }}
-      {% elif ostate==6 %}
-        {{ "Energiesparen Reduziert" }}
-      {% elif ostate==7 %}
-        {{ "Energiesparen Normal" }}
-      {% elif ostate==8 %}
-        {{ "Energiesparen Komfort" }}
-      {% else %}
-        {{ value }}
-      {% endif %}
-
-  - name: "Open3E HK1 Solltemperatur"
-    state_topic: "open3e/1643_MixerOneCircuitCurrentTemperatureSetpoint"
-    unique_id: vitocal_hk1_targettemp
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  # Vitocal 250 - Heizkreis 2
-  - name: "Open3E HK2 Vorlauftemperatur"
-    state_topic: "open3e/286_MixerTwoCircuitFlowTemperatureSensor/Actual"
-    unique_id: vitocal_hk2_flowtemp
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  - name: "Open3E HK2 Status Pumpe"
-    state_topic: "open3e/402_MixerTwoCircuitPump"
-    unique_id: vitocal_hk2_pumpstatus
-    value_template: >
-      {% if value=="1.0" %}
-        {{ "An" }}
-      {% else %}
-        {{ "Aus"}}
-      {% endif %}
-
-  - name: "Open3E HK2 Position Mischventil"
-    state_topic: "open3e/476_MixerTwoCircuitThreeWayValvePositionPercent"
-    unique_id: vitocal_hk2_valveposition
-    value_template: >
-      {{ float(value) / 100 }}
-
-  - name: "Open3E HK2 Vorlauftemperatur Sollwert"
-    state_topic: "open3e/988_MixerTwoCircuitFlowTemperatureTargetSetpoint"
-    unique_id: vitocal_hk2_flowtemptarget
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  - name: "Open3E HK2 Betriebsprogramm"
-    state_topic: "open3e/1416_MixerTwoCircuitOperationState/State"
-    unique_id: vitocal_hk2_operationstate
-    value_template: >
-      {% set ostate = int(value) %}
-      {% if ostate==0 %}
-        {{ "Abschaltbetrieb" }}
-      {% elif ostate==1 %}
-        {{ "Reduziert" }}
-      {% elif ostate==2 %}
-        {{ "Normal" }}
-      {% elif ostate==3 %}
-        {{ "Komfort" }}
-      {% elif ostate==4 %}
-        {{ "Festwert" }}
-      {% elif ostate==5 %}
-        {{ "Frostschutz" }}
-      {% elif ostate==6 %}
-        {{ "Energiesparen Reduziert" }}
-      {% elif ostate==7 %}
-        {{ "Energiesparen Normal" }}
-      {% elif ostate==8 %}
-        {{ "Energiesparen Komfort" }}
-      {% else %}
-        {{ value }}
-      {% endif %}
-
-  - name: "Open3E HK2 Solltemperatur"
-    state_topic: "open3e/1644_MixerTwoCircuitCurrentTemperatureSetpoint"
-    unique_id: vitocal_hk2_targettemp
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  # Vitocal 250 - Kompressor
-  - name: "Open3E Kompressor Einlauf Temperatur"
-    state_topic: "open3e/321_CompressorInletTemperatureSensor/Actual"
-    unique_id: vitocal_compressorinlettemp
-    device_class: temperature
-    state_class: measurement
-    unit_of_measurement: "°C"
-
-  - name: "Open3E Kompressor Einlauf Druck"
-    state_topic: "open3e/322_CompressorInletPressureSensor/Actual"
-    unique_id: vitocal_compressorinletpressure
+  - name: "Vitocal Wasserdruck"
+    state_topic: "open3e/680_318_WaterPressureSensor/Actual"
+    unique_id: 680_318_WaterPressureSensor
     device_class: pressure
     state_class: measurement
+    icon: mdi:gauge
     unit_of_measurement: "bar"
 
-  - name: "Open3E Kompressor Auslauf Temperatur"
-    state_topic: "open3e/324_CompressorOutletTemperatureSensor/Actual"
-    unique_id: vitocal_compressoroutlettemp
-    device_class: temperature
+  - name: "Vitocal Wärmetauscher Temperatur"
+    state_topic: "open3e/680_320_PrimaryHeatExchangerLiquidTemperatureSensor/Actual"
+    unique_id: 680_320_PrimaryHeatExchangerLiquidTemperatureSensor
     state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
     unit_of_measurement: "°C"
 
-  - name: "Open3E Kompressor Auslauf Druck"
-    state_topic: "open3e/325_CompressorOutletPressureSensor/Actual"
-    unique_id: vitocal_compressoroutletpressure
-    device_class: pressure
-    state_class: measurement
-    unit_of_measurement: "bar"
-
-  - name: "Open3E Kompressor Drehzahl Prozent"
-    state_topic: open3e/2346_CompressorSpeedPercent
-    unique_id: 2346_CompressorSpeedPercent
+  - name: "Vitocal Primärpumpe Drehzahl Prozent"
+    state_topic: "open3e/680_381_CentralHeatingPump"
+    unique_id: 680_381_CentralHeatingPump
     device_class: speed
     state_class: measurement
     icon: mdi:fan
     unit_of_measurement: "%"
 
-  - name: "Open3E Kompressor Status"
-    state_topic: "open3e/2351_HeatPumpCompressor"
-    unique_id: vitocal_compressorstatus
+  - name: "Vitocal Wartungsmeldungen"
+    state_topic: "open3e/680_901_ServiceManagerIsRequired"
+    unique_id: 680_901_ServiceManagerIsRequired
+    icon: mdi:account-wrench
+
+  - name: "Vitocal Störungsmeldungen"
+    state_topic: "open3e/680_902_MalfunctionIdentification"
+    unique_id: 680_902_MalfunctionIdentification
+    icon: mdi:file-document-alert
+
+  - name: "Vitocal Verflüssiger Temperatur"
+    state_topic: "open3e/680_2333_EconomizerLiquidTemperatureSensor/Actual"
+    unique_id: 680_2333_EconomizerLiquidTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Verdampfer Temperatur"
+    state_topic: "open3e/680_2334_EvaporatorVaporTemperatureSensor/Actual"
+    unique_id: 680_2334_EvaporatorVaporTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Leistungsaufnahme Wärmepumpe"
+    state_topic: "open3e/680_2488_CurrentElectricalPowerConsumptionSystem"
+    unique_id: 680_2488_CurrentElectricalPowerConsumptionSystem
+    device_class: power
+    state_class: measurement
+    icon: mdi:transmission-tower-export
+    unit_of_measurement: "W"
+
+  - name: "Vitocal Thermische Leistung"
+    state_topic: "open3e/680_2496_CurrentThermalCapacitySystem"
+    unique_id: 680_2496_CurrentThermalCapacitySystem
+    device_class: power
+    state_class: measurement
+    icon: mdi:radiator
+    unit_of_measurement: "W"
+
+  - name: "Vitocal Heizwasser-Pufferspeicher Temperature"
+    state_topic: "open3e/680_3016_HeatingBufferTemperatureSensor/Actual"
+    unique_id: 680_3016_vitocal_HeatingBufferTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Angeforderte Wärmeleistung Abtauen"
+    state_topic: "open3e/680_2256_DesiredThermalEnergyDefrost"
+    unique_id: 680_2256_DesiredThermalEnergyDefrost
+    device_class: power
+    state_class: measurement
+    icon: mdi:transmission-tower-export
+    unit_of_measurement: "W"
+
+  - name: "Vitocal Wärmepumpe Frostschutz"
+    state_topic: "open3e/6CF_2442_HeatPumpFrostProtection"
+    unique_id: 6CF_2442_HeatPumpFrostProtection
+    icon: mdi:electric-switch
+    value_template: >
+      {% if value=="0.0" %}
+        {{ "Inaktiv" }}
+      {% else %}
+        {{ "Aktiv"}}
+      {% endif %}
+
+  # Vitocal 250 - Heizkreis 1
+  - name: "Vitocal HK1 Vorlauftemperatur"
+    state_topic: "open3e/680_284_MixerOneCircuitFlowTemperatureSensor/Actual"
+    unique_id: 680_284_MixerOneCircuitFlowTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal HK1 Status Pumpe"
+    state_topic: "open3e/680_401_MixerOneCircuitPump"
+    unique_id: 680_401_MixerOneCircuitPump
+    icon: mdi:pump
     value_template: >
       {% if value=="1.0" %}
         {{ "An" }}
@@ -249,17 +137,239 @@ sensor:
         {{ "Aus"}}
       {% endif %}
 
-  - name: "Open3E Kompressor Starts"
-    state_topic: "open3e/2369_HeatPumpCompressorStatistical/starts"
-    unique_id: vitocal_compressorstarts
+  - name: "Vitocal HK1 Position Mischventil"
+    state_topic: "open3e/680_475_MixerOneCircuitThreeWayValvePositionPercent"
+    unique_id: 680_475_MixerOneCircuitThreeWayValvePositionPercent
+    icon: mdi:valve
+    value_template: >
+      {{ float(value) / 100 }}
 
-  - name: "Open3E Kompressor Betriebsstunden"
-    state_topic: "open3e/2369_HeatPumpCompressorStatistical/hours"
-    unique_id: vitocal_compressorhours
+  - name: "Vitocal HK1 Vorlauftemperatur Sollwert"
+    state_topic: "open3e/680_987_MixerOneCircuitFlowTemperatureTargetSetpoint"
+    unique_id: 680_987_MixerOneCircuitFlowTemperatureTargetSetpoint
+    device_class: temperature
+    state_class: measurement
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
 
-  - name: "Open3E Kompressor Drehzahl"
-    state_topic: "open3e/2569_CompressorSpeedRps"
-    unique_id: vitocal_compressorspeed
+  - name: "Vitocal HK1 Betriebsprogramm"
+    state_topic: "open3e/680_1415_MixerOneCircuitOperationState/State"
+    unique_id: 680_1415_MixerOneCircuitOperationState
+    icon: mdi:home-variant
+    value_template: >
+      {% set ostate = int(value) %}
+      {% if ostate==0 %}
+        {{ "Abschaltbetrieb" }}
+      {% elif ostate==1 %}
+        {{ "Reduziert" }}
+      {% elif ostate==2 %}
+        {{ "Normal" }}
+      {% elif ostate==3 %}
+        {{ "Komfort" }}
+      {% elif ostate==4 %}
+        {{ "Festwert" }}
+      {% elif ostate==5 %}
+        {{ "Frostschutz" }}
+      {% elif ostate==6 %}
+        {{ "Energiesparen Reduziert" }}
+      {% elif ostate==7 %}
+        {{ "Energiesparen Normal" }}
+      {% elif ostate==8 %}
+        {{ "Energiesparen Komfort" }}
+      {% else %}
+        {{ value }}
+      {% endif %}
+
+  - name: "Vitocal HK1 Solltemperatur"
+    state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
+    unique_id: 680_1643_MixerOneCircuitCurrentTemperatureSetpoint
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal HK1 Frostschutz"
+    state_topic: "open3e/680_2855_MixerOneCircuitFrostProtectionConfiguration"
+    unique_id: 680_2855_MixerOneCircuitFrostProtectionConfiguration
+    icon: mdi:toggle-switch-variant
+    value_template: >
+      {% if value=="1.0" %}
+        {{ "Aktiv" }}
+      {% else %}
+        {{ "Inaktiv"}}
+      {% endif %}
+
+  # Vitocal 250 - Heizkreis 2
+  - name: "Vitocal HK2 Vorlauftemperatur"
+    state_topic: "open3e/680_286_MixerTwoCircuitFlowTemperatureSensor/Actual"
+    unique_id: 680_286_MixerTwoCircuitFlowTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal HK2 Status Pumpe"
+    state_topic: "open3e/680_402_MixerTwoCircuitPump"
+    unique_id: 680_402_MixerTwoCircuitPump
+    icon: mdi:pump
+    value_template: >
+      {% if value=="1.0" %}
+        {{ "An" }}
+      {% else %}
+        {{ "Aus"}}
+      {% endif %}
+
+  - name: "Vitocal HK2 Position Mischventil"
+    state_topic: "open3e/680_476_MixerTwoCircuitThreeWayValvePositionPercent"
+    unique_id: 680_476_MixerTwoCircuitThreeWayValvePositionPercent
+    icon: mdi:valve
+    value_template: >
+      {{ float(value) / 100 }}
+
+  - name: "Vitocal HK2 Vorlauftemperatur Sollwert"
+    state_topic: "open3e/680_988_MixerTwoCircuitFlowTemperatureTargetSetpoint"
+    unique_id: 680_988_MixerTwoCircuitFlowTemperatureTargetSetpoint
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal HK2 Betriebsprogramm"
+    state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/State"
+    unique_id: 680_1416_MixerTwoCircuitOperationState
+    icon: mdi:home-variant
+    value_template: >
+      {% set ostate = int(value) %}
+      {% if ostate==0 %}
+        {{ "Abschaltbetrieb" }}
+      {% elif ostate==1 %}
+        {{ "Reduziert" }}
+      {% elif ostate==2 %}
+        {{ "Normal" }}
+      {% elif ostate==3 %}
+        {{ "Komfort" }}
+      {% elif ostate==4 %}
+        {{ "Festwert" }}
+      {% elif ostate==5 %}
+        {{ "Frostschutz" }}
+      {% elif ostate==6 %}
+        {{ "Energiesparen Reduziert" }}
+      {% elif ostate==7 %}
+        {{ "Energiesparen Normal" }}
+      {% elif ostate==8 %}
+        {{ "Energiesparen Komfort" }}
+      {% else %}
+        {{ value }}
+      {% endif %}
+
+  - name: "Vitocal HK2 Solltemperatur"
+    state_topic: "open3e/680_1644_MixerTwoCircuitCurrentTemperatureSetpoint"
+    unique_id: 680_1644_MixerTwoCircuitCurrentTemperatureSetpoint
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal HK2 Frostschutz"
+    state_topic: "open3e/680_2856_MixerTwoCircuitFrostProtectionConfiguration"
+    unique_id: 680_2856_MixerTwoCircuitFrostProtectionConfiguration
+    icon: mdi:toggle-switch-variant
+    value_template: >
+      {% if value=="1.0" %}
+        {{ "Aktiv" }}
+      {% else %}
+        {{ "Inaktiv"}}
+      {% endif %}
+
+  # Vitocal 250 - Kompressor
+  - name: "Vitocal Kompressor Einlauf Temperatur"
+    state_topic: "open3e/680_321_CompressorInletTemperatureSensor/Actual"
+    unique_id: 680_321_CompressorInletTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Kompressor Einlauf Druck"
+    state_topic: "open3e/680_322_CompressorInletPressureSensor/Actual"
+    unique_id: 680_322_CompressorInletPressureSensor
+    device_class: pressure
+    state_class: measurement
+    icon: mdi:gauge
+    unit_of_measurement: "bar"
+
+  - name: "Vitocal Kompressor Auslauf Temperatur"
+    state_topic: "open3e/680_324_CompressorOutletTemperatureSensor/Actual"
+    unique_id: 680_324_CompressorOutletTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Kompressor Auslauf Druck"
+    state_topic: "open3e/680_325_CompressorOutletPressureSensor/Actual"
+    unique_id: 680_325_CompressorOutletPressureSensor
+    device_class: pressure
+    state_class: measurement
+    icon: mdi:gauge
+    unit_of_measurement: "bar"
+
+  - name: "Vitocal Kompressor Drehzahl Prozent"
+    state_topic: "open3e/680_2346_CompressorSpeedPercent"
+    unique_id: 680_2346_CompressorSpeedPercent
+    device_class: speed
+    state_class: measurement
+    icon: mdi:fan
+    unit_of_measurement: "%"
+
+  - name: "Vitocal Kompressor Status"
+    state_topic: "open3e/680_2351_HeatPumpCompressor"
+    unique_id: 680_2351_HeatPumpCompressor
+    icon: mdi:electric-switch
+    value_template: >
+      {% if value=="1.0" %}
+        {{ "An" }}
+      {% else %}
+        {{ "Aus"}}
+      {% endif %}
+
+  - name: "Vitocal Kompressor Starts"
+    state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/starts"
+    unique_id: 680_2369_HeatPumpCompressorStatistical_starts
+    icon: mdi:counter
+
+  - name: "Vitocal Kompressor Betriebsstunden"
+    state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/hours"
+    unique_id: 680_2369_HeatPumpCompressorStatistical_hours
+    icon: mdi:store-clock
+
+  - name: "Vitocal Kompressor Drehzahl"
+    state_topic: "open3e/680_2569_CompressorSpeedRps"
+    unique_id: 680_2569_CompressorSpeedRps
     device_class: speed
     icon: mdi:fan
     unit_of_measurement: "rps"
+
+  # Vitocal 250 - Zusatzheizung
+  - name: "Vitocal Elektrische Zusatzheizung"
+    state_topic: "open3e/680_2352_AdditionalElectricHeater"
+    unique_id: 680_2352_AdditionalElectricHeater
+    icon: mdi:electric-switch
+
+  - name: "Vitocal Zusatzheizung Starts"
+    state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/starts"
+    unique_id: 680_2370_AdditionalElectricHeaterStatistical_starts
+    icon: mdi:counter
+
+  - name: "Vitocal Zusatzheizung Betriebsstunden"
+    state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/hours"
+    unique_id: 680_2370_AdditionalElectricHeaterStatistical_hours
+    icon: mdi:store-clock
+
+  - name: "Vitocal Leistungsaufnahme Zusatzheizung"
+    state_topic: "open3e/680_2487_CurrentElectricalPowerConsumptionElectricHeater"
+    unique_id: 680_2487_CurrentElectricalPowerConsumptionElectricHeater
+    device_class: power
+    state_class: measurement
+    icon: mdi:transmission-tower-export
+    unit_of_measurement: "W"

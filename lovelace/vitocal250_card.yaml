@@ -1,0 +1,60 @@
+type: vertical-stack
+cards:
+  - type: entities
+    entities:
+      - entity: sensor.vitocal_leistungsaufnahme_warmepumpe
+        name: Elektrische Leistungsaufname Netz
+      - entity: sensor.vitocal_thermische_leistung
+        name: Erzeugte Thermische Leistung
+      - entity: sensor.vitocal_angeforderte_warmeleistung_abtauen
+        name: Verbrauch Thermische Leistung Abtauen
+    title: Vitocal 250 - Wärmepumpe
+  - type: entities
+    entities:
+      - entity: sensor.vitocal_kompressor_status
+        name: Kompressor Status
+      - entity: sensor.vitocal_kompressor_drehzahl
+        name: Kompressor Drehzahl
+      - entity: sensor.vitocal_kompressor_drehzahl_prozent
+        name: Kompressor Drehzahl Prozent
+      - entity: sensor.vitocal_kompressor_einlauf_temperatur
+        name: Einlauf Temperatur
+      - entity: sensor.vitocal_kompressor_auslauf_temperatur
+        name: Auslauf Temperatur
+      - entity: sensor.vitocal_kompressor_einlauf_druck
+        name: Einlauf Druck
+      - entity: sensor.vitocal_kompressor_auslauf_druck
+        name: Auslauf Druck
+      - entity: sensor.vitocal_kompressor_starts
+        name: Starts seit Inbetriebnahme
+      - entity: sensor.vitocal_kompressor_betriebsstunden
+        name: Betriebsstunden gesamt
+    title: Vitocal 250 - Kompressor
+  - type: entities
+    entities:
+      - entity: sensor.vitocal_hk1_betriebsprogramm
+        name: Betriebsprogramm
+      - entity: sensor.vitocal_hk1_solltemperatur
+        name: Raumtemperatur Sollwert
+      - entity: sensor.vitocal_hk1_frostschutz
+        name: Status Frostschutz
+      - entity: sensor.vitocal_hk1_position_mischventil
+        name: Position Mischventil
+      - entity: sensor.vitocal_hk1_status_pumpe
+        name: Status Pumpe
+      - entity: sensor.vitocal_hk1_vorlauftemperatur_sollwert
+        name: Vorlauftemperatur Sollwert
+      - entity: sensor.vitocal_hk1_vorlauftemperatur
+        name: Vorlauftemperatur Istwert
+    title: Vitocal 250 - Heizkreis 1
+  - type: entities
+    entities:
+      - entity: sensor.vitocal_elektrische_zusatzheizung
+        name: Status elektrische Zusatzheizung
+      - entity: sensor.vitocal_leistungsaufnahme_zusatzheizung
+        name: Leistungsaufnahme Netz
+      - entity: sensor.vitocal_zusatzheizung_starts
+        name: Starts seit Inbetriebnahme
+      - entity: sensor.vitocal_zusatzheizung_betriebsstunden
+        name: Betriebsstunden gesamt
+    title: Vitocal 250 - Zusatzheizung
