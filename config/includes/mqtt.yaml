@@ -1,3 +1,13 @@
+binary_sensor:
+  # TEST für binary_sensor
+  - name: "Vitocal Kompressor Status TEST"
+    state_topic: "open3e/680_2351_HeatPumpCompressor"
+    unique_id: 680_2351_HeatPumpCompressor_TEST
+    payload_off: "0.0"
+    payload_on: "1.0"
+    device_class: running
+    icon: mdi:toggle-switch-variant
+
 sensor:
   # Vitocal 250 - Allgemein
   - name: "Vitocal Vorlauftemperatur"
@@ -32,9 +42,17 @@ sensor:
     icon: mdi:gauge
     unit_of_measurement: "bar"
 
-  - name: "Vitocal Wärmetauscher Temperatur"
+  - name: "Vitocal Primärer Wärmetauscher Temperatur"
     state_topic: "open3e/680_320_PrimaryHeatExchangerLiquidTemperatureSensor/Actual"
     unique_id: 680_320_PrimaryHeatExchangerLiquidTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Sekundärer Wärmetauscher Temperatur"
+    state_topic: "open3e/680_355_SecondaryHeatExchangerLiquidTemperatureSensor/Actual"
+    unique_id: 680_355_SecondaryHeatExchangerLiquidTemperatureSensor
     state_class: measurement
     device_class: temperature
     icon: mdi:thermometer
@@ -48,6 +66,20 @@ sensor:
     icon: mdi:fan
     unit_of_measurement: "%"
 
+  - name: "Vitocal Position Erweiterungsventil 1"
+    state_topic: "open3e/680_389_ElectronicExpansionValveOneCurrentPositionPercent"
+    unique_id: 680_389_ElectronicExpansionValveOneCurrentPositionPercent
+    state_class: measurement
+    icon: mdi:valve
+    unit_of_measurement: "%"
+
+  - name: "Vitocal Position Erweiterungsventil 2"
+    state_topic: "open3e/680_391_ElectronicExpansionValveTwoCurrentPositionPercent"
+    unique_id: 680_391_ElectronicExpansionValveTwoCurrentPositionPercent
+    state_class: measurement
+    icon: mdi:valve
+    unit_of_measurement: "%"
+
   - name: "Vitocal Wartungsmeldungen"
     state_topic: "open3e/680_901_ServiceManagerIsRequired"
     unique_id: 680_901_ServiceManagerIsRequired
@@ -57,6 +89,42 @@ sensor:
     state_topic: "open3e/680_902_MalfunctionIdentification"
     unique_id: 680_902_MalfunctionIdentification
     icon: mdi:file-document-alert
+
+  - name: "Vitocal Durchflusssensor"
+    state_topic: "open3e/680_1043_AllengraSensor/Actual"
+    unique_id: 680_1043_AllengraSensor
+    state_class: measurement
+    icon: mdi:gauge
+
+  - name: "Vitocal Primäre Einlauftemperatur"
+    state_topic: "open3e/680_1769_PrimaryInletTemperatureSensor/Actual"
+    unique_id: 680_1769_PrimaryInletTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Heizungsraum Temperatur"
+    state_topic: "open3e/680_1771_EngineRoomTemperatureSensor/Actual"
+    unique_id: 680_1771_EngineRoomTemperatureSensor
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Primärkreislauf Lüfter 1"
+    state_topic: "open3e/680_1775_PrimaryCircuitFanOne"
+    unique_id: 680_1775_PrimaryCircuitFanOne
+    device_class: speed
+    icon: mdi:fan
+    unit_of_measurement: "rps"
+
+  - name: "Vitocal Primärkreislauf Lüfter 2"
+    state_topic: "open3e/680_1776_PrimaryCircuitFanTwo"
+    unique_id: 680_1776_PrimaryCircuitFanTwo
+    device_class: speed
+    icon: mdi:fan
+    unit_of_measurement: "rps"
 
   - name: "Vitocal Verflüssiger Temperatur"
     state_topic: "open3e/680_2333_EconomizerLiquidTemperatureSensor/Actual"
@@ -116,6 +184,30 @@ sensor:
       {% else %}
         {{ "Aktiv"}}
       {% endif %}
+
+  - name: "Vitocal 4/3-Wege Ventil Position"
+    state_topic: "open3e/680_2735_FourThreeWayValveValveCurrentPosition"
+    unique_id: 680_2735_FourThreeWayValveValveCurrentPosition
+    icon: mdi:valve
+    value_template: >
+      {{ float(value) }}
+
+  # Vitocal 250 - Warmwasser
+  - name: "Vitocal Warmwasser"
+    state_topic: "open3e/680_271_DomesticHotWaterSensor/Actual"
+    unique_id: 680_271_DomesticHotWaterSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
+  - name: "Vitocal Warmwasser Solltemperatur"
+    state_topic: "open3e/680_396_DomesticHotWaterTemperatureSetpoint"
+    unique_id: 680_396_DomesticHotWaterTemperatureSetpoint
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
 
   # Vitocal 250 - Heizkreis 1
   - name: "Vitocal HK1 Vorlauftemperatur"
@@ -314,6 +406,14 @@ sensor:
     icon: mdi:gauge
     unit_of_measurement: "bar"
 
+  - name: "Vitocal Kompressor Öl Temperatur"
+    state_topic: "open3e/680_1772_CompressorOilTemperatureSensor/Actual"
+    unique_id: 680_1772_CompressorOilTemperatureSensor
+    device_class: temperature
+    state_class: measurement
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+
   - name: "Vitocal Kompressor Drehzahl Prozent"
     state_topic: "open3e/680_2346_CompressorSpeedPercent"
     unique_id: 680_2346_CompressorSpeedPercent
@@ -335,11 +435,13 @@ sensor:
 
   - name: "Vitocal Kompressor Starts"
     state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/starts"
+    state_class: total_increasing
     unique_id: 680_2369_HeatPumpCompressorStatistical_starts
     icon: mdi:counter
 
   - name: "Vitocal Kompressor Betriebsstunden"
     state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/hours"
+    state_class: total_increasing
     unique_id: 680_2369_HeatPumpCompressorStatistical_hours
     icon: mdi:store-clock
 
@@ -358,11 +460,13 @@ sensor:
 
   - name: "Vitocal Zusatzheizung Starts"
     state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/starts"
+    state_class: total_increasing
     unique_id: 680_2370_AdditionalElectricHeaterStatistical_starts
     icon: mdi:counter
 
   - name: "Vitocal Zusatzheizung Betriebsstunden"
     state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/hours"
+    state_class: total_increasing
     unique_id: 680_2370_AdditionalElectricHeaterStatistical_hours
     icon: mdi:store-clock
 
