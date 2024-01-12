@@ -1,0 +1,216 @@
+type: picture-elements
+image: /local/kreislauf.png
+title: Viessmann Vitocal 250-A Kältekreislauf
+style:
+  width: 1280px
+  height: 720px
+elements:
+  - entity: sensor.274_outsidetemperaturesensor
+    type: state-label
+    prefix: 'Außentemperatur: '
+    style:
+      font-size: 0.8vw
+      color: black
+      transform: translate(0,0)
+      top: 0.5%
+      left: 0.5%
+  - entity: sensor.1415_mixeronecircuitoperationstate
+    type: state-label
+    prefix: 'Betriebsprogramm: '
+    style:
+      font-size: 0.8vw
+      color: black
+      transform: translate(0,0)
+      top: 3.0%
+      left: 0.5%
+  - entity: binary_sensor.2351_heatpumpcompressor
+    type: state-label
+    prefix: 'Kompressor: '
+    style:
+      font-size: 0.8vw
+      color: black
+      transform: translate(0,0)
+      top: 5.5%
+      left: 0.5%
+  - entity: sensor.1769_primaryinlettemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 28%
+      left: 3%
+  - entity: sensor.1775_primarycircuitfanone
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 50%
+      left: 12%
+  - entity: sensor.1776_primarycircuitfantwo
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 27%
+      left: 12%
+  - entity: sensor.320_primaryheatexchangerliquidtemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 15%
+      left: 20%
+  - entity: sensor.389_electronicexpansionvalveonecurrentpositionpercent
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 17%
+      left: 61.5%
+  - entity: sensor.391_electronicexpansionvalvetwocurrentpositionpercent
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 30%
+      left: 35.5%
+  - entity: sensor.2334_evaporatorvaportemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 30%
+      left: 55%
+  - entity: sensor.2333_economizerliquidtemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 17%
+      left: 43.5%
+  - entity: sensor.321_compressorinlettemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 74.5%
+      left: 50.5%
+  - entity: sensor.322_compressorinletpressuresensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 73.5%
+      left: 62%
+  - entity: sensor.1772_compressoroiltemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(-100%,-50%)
+      top: 64%
+      left: 38.5%
+  - entity: sensor.2346_compressorspeedpercent
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(-100%,-50%)
+      top: 78.5%
+      left: 46%
+  - entity: sensor.324_compressoroutlettemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(-100%,-50%)
+      top: 92%
+      left: 38.5%
+  - entity: sensor.325_compressoroutletpressuresensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(-100%,-50%)
+      top: 92%
+      left: 60%
+  - entity: sensor.2735_fourthreewayvalvevalvecurrentposition
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(0,0)
+      top: 85%
+      left: 74%
+  - entity: sensor.1770_secondaryoutlettemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 86%
+      left: 90%
+  - entity: sensor.268_flowtemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: green
+      top: 89%
+      left: 90%
+  - entity: sensor.355_secondaryheatexchangerliquidtemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 17%
+      left: 71%
+  - entity: sensor.269_returntemperaturesensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 17%
+      left: 88%
+  - entity: sensor.1043_allengrasensor
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 23%
+      left: 95%
+  - entity: sensor.381_centralheatingpump
+    type: state-label
+    style:
+      font-size: 1vw
+      color: black
+      top: 20%
+      left: 95%
+  - entity: sensor.2488_currentelectricalpowerconsumptionsystem
+    type: state-label
+    title: Elektrische Leistungsaufnahme
+    suffix: ' el'
+    style:
+      font-size: 1vw
+      color: blue
+      transform: translate(0,0)
+      top: 37%
+      left: 47%
+  - entity: sensor.2496_currentthermalcapacitysystem
+    type: state-label
+    title: Thermische Leistung
+    suffix: ' th'
+    style:
+      font-size: 1vw
+      color: blue
+      transform: translate(0,0)
+      top: 37%
+      left: 85%
+  - entity: sensor.3016_heatingbuffertemperaturesensor
+    type: state-label
+    title: Thermische Leistung
+    prefix: 'Speicher: '
+    style:
+      font-size: 1vw
+      color: black
+      transform: translate(0,0)
+      top: 50%
+      left: 85%

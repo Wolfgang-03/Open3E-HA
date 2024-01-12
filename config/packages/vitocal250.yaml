@@ -1,0 +1,955 @@
+mqtt:
+  climate:
+    - name: Heizkreis 1
+      unique_id: open3e_heizkreis1
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      modes:
+        - "off"
+        - "auto"
+      min_temp: 3
+      max_temp: 37
+      mode_state_topic: "open3e/680_1415_MixerOneCircuitOperationState/Mode"
+      mode_state_template: "{{'off' if value_json == 0 else 'auto'}}"
+      mode_command_topic: "open3e/cmnd"
+      mode_command_template: >
+        {% set values = { 'auto':'0102', 'off':'0000'} %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[1415, values[value]]]} %}
+        {{ cmd | to_json }}
+      payload_on: "1"
+      payload_off: "0"
+      power_command_topic: "open3e/cmnd"
+      power_command_template: >
+        {% set values = { '1':'0102', '0':'0000'} %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[1415, values[value]]]} %}
+        {{ cmd | to_json }}
+      temperature_state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
+      temperature_command_topic: "open3e/cmnd"
+      temperature_command_template: >
+        {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
+        {% set hk1_bp = states('sensor.vitocal_hk1_betriebsprogramm') %}
+        {% if (hk1_bp=="Komfort") %}
+        {% set wert = min(max([3, value-2]),37) %}
+        {% elif (hk1_bp=="Reduziert") %}
+        {% set wert = min(max([3, value+2]),37) %}
+        {% elif (hk1_bp=="Frostschutz") %}
+        {% set wert = min(max([3, value+2]),37) %}
+        {% else %}
+        {% set wert = value %}
+        {% endif %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[424, values[wert]]]} %}
+        {{ cmd | to_json }}
+      current_temperature_topic: "zigbee2mqtt/Heizung Wohnzimmer"
+      current_temperature_template: >
+        {{ state_attr('climate.heizung_wohnzimmer', 'current_temperature') }}
+      precision: 1.0
+      temperature_unit: "C"
+
+    - name: Heizkreis 2
+      unique_id: open3e_heizkreis2
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      modes:
+        - "off"
+        - "auto"
+      min_temp: 3
+      max_temp: 37
+      mode_state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/Mode"
+      mode_state_template: "{{'off' if value_json == 0 else 'auto'}}"
+      mode_command_topic: "open3e/cmnd"
+      mode_command_template: >
+        {% set values = { 'auto':'0102', 'off':'0000'} %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[1416, values[value]]]} %}
+        {{ cmd | to_json }}
+      payload_on: "1"
+      payload_off: "0"
+      power_command_topic: "open3e/cmnd"
+      power_command_template: >
+        {% set values = { '1':'0102', '0':'0000'} %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[1416, values[value]]]} %}
+        {{ cmd | to_json }}
+      temperature_state_topic: "open3e/680_1644_MixerTwoCircuitCurrentTemperatureSetpoint"
+      temperature_command_topic: "open3e/cmnd"
+      temperature_command_template: >
+        {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
+        {% set hk2_bp = states('sensor.vitocal_hk2_betriebsprogramm') %}
+        {% if (hk2_bp=="Komfort") %}
+        {% set wert = min(max([3, value-2]),37) %}
+        {% elif (hk2_bp=="Reduziert") %}
+        {% set wert = min(max([3, value+2]),37) %}
+        {% elif (hk2_bp=="Frostschutz") %}
+        {% set wert = min(max([3, value+2]),37) %}
+        {% else %}
+        {% set wert = value %}
+        {% endif %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[426, values[wert]]]} %}
+        {{ cmd | to_json }}
+
+  binary_sensor:
+    # Vitocal 250 - Allgemein
+    - name: "Vitocal Wärmepumpe Frostschutz"
+      state_topic: "open3e/6CF_2442_HeatPumpFrostProtection"
+      unique_id: 6CF_2442_HeatPumpFrostProtection
+      object_id: 2442_HeatPumpFrostProtection
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:power
+
+    # Vitocal 250 - Heizkreis 1
+    - name: "Vitocal HK1 Frostschutz"
+      state_topic: "open3e/680_2855_MixerOneCircuitFrostProtectionConfiguration"
+      unique_id: 680_2855_MixerOneCircuitFrostProtectionConfiguration
+      object_id: 2855_MixerOneCircuitFrostProtectionConfiguration
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:power
+
+    - name: "Vitocal HK1 Status Pumpe"
+      state_topic: "open3e/680_401_MixerOneCircuitPump"
+      unique_id: 680_401_MixerOneCircuitPump
+      object_id: 401_MixerOneCircuitPump
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:pump
+
+    # Vitocal 250 - Heizkreis 2
+    - name: "Vitocal HK2 Frostschutz"
+      state_topic: "open3e/680_2856_MixerTwoCircuitFrostProtectionConfiguration"
+      unique_id: 680_2856_MixerTwoCircuitFrostProtectionConfiguration
+      object_id: 2856_MixerTwoCircuitFrostProtectionConfiguration
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:power
+
+    - name: "Vitocal HK2 Status Pumpe"
+      state_topic: "open3e/680_402_MixerTwoCircuitPump"
+      unique_id: 680_402_MixerTwoCircuitPump
+      object_id: 402_MixerTwoCircuitPump
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:pump
+
+    # Vitocal 250 - Kompressor
+    - name: "Vitocal Kompressor Status"
+      state_topic: "open3e/680_2351_HeatPumpCompressor"
+      unique_id: 680_2351_HeatPumpCompressor
+      object_id: 2351_heatpumpcompressor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_off: "0.0"
+      payload_on: "1.0"
+      icon: mdi:power
+
+    # Vitocal 250 - Zusatzheizung
+    - name: "Vitocal Zusatzheizung Status"
+      state_topic: "open3e/680_2352_AdditionalElectricHeater"
+      unique_id: 680_2352_AdditionalElectricHeater
+      object_id: 2352_additionalelectricheater
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      payload_on: "0100"
+      payload_off: "0000"
+      value_template: "{{ value_json.state }}"
+      icon: mdi:power
+
+  sensor:
+    # Vitocal 250 - Allgemein
+    - name: "Vitocal Vorlauftemperatur"
+      state_topic: "open3e/680_268_FlowTemperatureSensor/Actual"
+      unique_id: 680_268_FlowTemperatureSensor
+      object_id: 268_flowtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Rücklauftemperatur"
+      state_topic: "open3e/680_269_ReturnTemperatureSensor/Actual"
+      unique_id: 680_269_ReturnTemperatureSensor
+      object_id: 269_returntemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Außentemperatur"
+      state_topic: "open3e/680_274_OutsideTemperatureSensor/Actual"
+      unique_id: 680_274_OutsideTemperatureSensor
+      object_id: 274_outsidetemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Wasserdruck"
+      state_topic: "open3e/680_318_WaterPressureSensor/Actual"
+      unique_id: 680_318_WaterPressureSensor
+      object_id: 318_waterpressuresensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: pressure
+      state_class: measurement
+      icon: mdi:gauge
+      unit_of_measurement: "bar"
+
+    - name: "Vitocal Primärer Wärmetauscher Temperatur"
+      state_topic: "open3e/680_320_PrimaryHeatExchangerLiquidTemperatureSensor/Actual"
+      unique_id: 680_320_PrimaryHeatExchangerLiquidTemperatureSensor
+      object_id: 320_primaryheatexchangerliquidtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Sekundärer Wärmetauscher Temperatur"
+      state_topic: "open3e/680_355_SecondaryHeatExchangerLiquidTemperatureSensor/Actual"
+      unique_id: 680_355_SecondaryHeatExchangerLiquidTemperatureSensor
+      object_id: 355_secondaryheatexchangerliquidtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Primärpumpe Drehzahl Prozent"
+      state_topic: "open3e/680_381_CentralHeatingPump"
+      unique_id: 680_381_CentralHeatingPump
+      object_id: 381_centralheatingpump
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      state_class: measurement
+      icon: mdi:fan
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Position Erweiterungsventil 1"
+      state_topic: "open3e/680_389_ElectronicExpansionValveOneCurrentPositionPercent"
+      unique_id: 680_389_ElectronicExpansionValveOneCurrentPositionPercent
+      object_id: 389_electronicexpansionvalveonecurrentpositionpercent
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      icon: mdi:valve
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Position Erweiterungsventil 2"
+      state_topic: "open3e/680_391_ElectronicExpansionValveTwoCurrentPositionPercent"
+      unique_id: 680_391_ElectronicExpansionValveTwoCurrentPositionPercent
+      object_id: 391_electronicexpansionvalvetwocurrentpositionpercent
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      icon: mdi:valve
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Wartungsmeldungen"
+      state_topic: "open3e/680_901_ServiceManagerIsRequired"
+      unique_id: 680_901_ServiceManagerIsRequired
+      object_id: 901_servicemanagerisrequired
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:account-wrench
+
+    - name: "Vitocal Störungsmeldungen"
+      state_topic: "open3e/680_902_MalfunctionIdentification"
+      unique_id: 680_902_MalfunctionIdentification
+      object_id: 902_malfunctionidentification
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:file-document-alert
+
+    - name: "Vitocal Durchflusssensor"
+      state_topic: "open3e/680_1043_AllengraSensor/Actual"
+      unique_id: 680_1043_AllengraSensor
+      object_id: 1043_allengrasensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      icon: mdi:gauge
+      unit_of_measurement: "m³/h"
+
+    - name: "Vitocal Primäre Einlauftemperatur"
+      state_topic: "open3e/680_1769_PrimaryInletTemperatureSensor/Actual"
+      unique_id: 680_1769_PrimaryInletTemperatureSensor
+      object_id: 1769_primaryinlettemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Secondärkreislauf Vorlauf Temperatur"
+      state_topic: "open3e/680_1770_SecondaryOutletTemperatureSensor/Actual"
+      unique_id: 680_1770_SecondaryOutletTemperatureSensor
+      object_id: 1770_secondaryoutlettemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Heizungsraum Temperatur"
+      state_topic: "open3e/680_1771_EngineRoomTemperatureSensor/Actual"
+      unique_id: 680_1771_EngineRoomTemperatureSensor
+      object_id: 1771_engineroomtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Primärkreislauf Lüfter 1"
+      state_topic: "open3e/680_1775_PrimaryCircuitFanOne"
+      unique_id: 680_1775_PrimaryCircuitFanOne
+      object_id: 1775_primarycircuitfanone
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:fan
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Primärkreislauf Lüfter 2"
+      state_topic: "open3e/680_1776_PrimaryCircuitFanTwo"
+      unique_id: 680_1776_PrimaryCircuitFanTwo
+      object_id: 1776_primarycircuitfantwo
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:fan
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Verflüssiger Temperatur"
+      state_topic: "open3e/680_2333_EconomizerLiquidTemperatureSensor/Actual"
+      unique_id: 680_2333_EconomizerLiquidTemperatureSensor
+      object_id: 2333_economizerliquidtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann" 
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Smart Grid Betriebszustand"
+      state_topic: "open3e/680_2350_EnergyManagmentSystemResultingControlState"
+      unique_id: 680_2350_EnergyManagmentSystemResultingControlState
+      object_id: 2350_energymanagmentsystemresultingcontrolstate
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:home-variant
+      value_template: >
+        {% set ostate = int(value) %}
+        {% if ostate==1 %}
+          {{ "Abschaltbetrieb" }}
+        {% elif ostate==2 %}
+          {{ "Normalbetrieb" }}
+        {% elif ostate==3 %}
+          {{ "Bevorzugter Betrieb" }}
+        {% elif ostate==4 %}
+          {{ "Erzwungener Betrieb" }}
+        {% else %}
+          {{ value }}
+        {% endif %}
+
+    - name: "Vitocal Verdampfer Temperatur"
+      state_topic: "open3e/680_2334_EvaporatorVaporTemperatureSensor/Actual"
+      unique_id: 680_2334_EvaporatorVaporTemperatureSensor
+      object_id: 2334_evaporatorvaportemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Leistungsaufnahme Wärmepumpe"
+      state_topic: "open3e/680_2488_CurrentElectricalPowerConsumptionSystem"
+      unique_id: 680_2488_CurrentElectricalPowerConsumptionSystem
+      object_id: 2488_currentelectricalpowerconsumptionsystem
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: power
+      state_class: measurement
+      icon: mdi:transmission-tower-export
+      unit_of_measurement: "W"
+
+    - name: "Vitocal Thermische Leistung"
+      state_topic: "open3e/680_2496_CurrentThermalCapacitySystem"
+      unique_id: 680_2496_CurrentThermalCapacitySystem
+      object_id: 2496_currentthermalcapacitysystem
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: power
+      state_class: measurement
+      icon: mdi:radiator
+      unit_of_measurement: "W"
+
+    - name: "Vitocal Heizwasser-Pufferspeicher Temperature"
+      state_topic: "open3e/680_3016_HeatingBufferTemperatureSensor/Actual"
+      unique_id: 680_3016_vitocal_HeatingBufferTemperatureSensor
+      object_id: 3016_heatingbuffertemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Angeforderte Wärmeleistung Abtauen"
+      state_topic: "open3e/680_2256_DesiredThermalEnergyDefrost"
+      unique_id: 680_2256_DesiredThermalEnergyDefrost
+      object_id: 2256_desiredthermalenergydefrost
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: power
+      state_class: measurement
+      icon: mdi:transmission-tower-export
+      unit_of_measurement: "W"
+
+    - name: "Vitocal 4/3-Wege Ventil Position"
+      state_topic: "open3e/680_2735_FourThreeWayValveValveCurrentPosition"
+      unique_id: 680_2735_FourThreeWayValveValveCurrentPosition
+      object_id: 2735_fourthreewayvalvevalvecurrentposition
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:valve
+      value_template: >
+        {{ float(value) }}
+
+    # Vitocal 250 - Warmwasser
+    - name: "Vitocal Warmwasser Temperatur"
+      state_topic: "open3e/680_271_DomesticHotWaterSensor/Actual"
+      unique_id: 680_271_DomesticHotWaterSensor
+      object_id: 271_domestichotwatersensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Warmwasser Solltemperatur"
+      state_topic: "open3e/680_396_DomesticHotWaterTemperatureSetpoint"
+      unique_id: 680_396_DomesticHotWaterTemperatureSetpoint
+      object_id: 396_domestichotwatertemperaturesetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    # Vitocal 250 - Heizkreis 1
+    - name: "Vitocal HK1 Vorlauftemperatur"
+      state_topic: "open3e/680_284_MixerOneCircuitFlowTemperatureSensor/Actual"
+      unique_id: 680_284_MixerOneCircuitFlowTemperatureSensor
+      object_id: 284_mixeronecircuitflowtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK1 Position Mischventil"
+      state_topic: "open3e/680_475_MixerOneCircuitThreeWayValvePositionPercent"
+      unique_id: 680_475_MixerOneCircuitThreeWayValvePositionPercent
+      object_id: 475_mixeronecircuitthreewayvalvepositionpercent
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:valve
+      value_template: >
+        {{ float(value) / 100 }}
+
+    - name: "Vitocal HK1 Vorlauftemperatur Sollwert"
+      state_topic: "open3e/680_987_MixerOneCircuitFlowTemperatureTargetSetpoint"
+      unique_id: 680_987_MixerOneCircuitFlowTemperatureTargetSetpoint
+      object_id: 987_mixeronecircuitflowtemperaturetargetsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer
+
+    - name: "Vitocal HK1 Betriebsprogramm"
+      state_topic: "open3e/680_1415_MixerOneCircuitOperationState/State"
+      unique_id: 680_1415_MixerOneCircuitOperationState
+      object_id: 1415_mixeronecircuitoperationstate
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:home-variant
+      value_template: >
+        {% set ostate = int(value) %}
+        {% if ostate==0 %}
+          {{ "Abschaltbetrieb" }}
+        {% elif ostate==1 %}
+          {{ "Reduziert" }}
+        {% elif ostate==2 %}
+          {{ "Normal" }}
+        {% elif ostate==3 %}
+          {{ "Komfort" }}
+        {% elif ostate==4 %}
+          {{ "Festwert" }}
+        {% elif ostate==5 %}
+          {{ "Frostschutz" }}
+        {% elif ostate==6 %}
+          {{ "Energiesparen Reduziert" }}
+        {% elif ostate==7 %}
+          {{ "Energiesparen Normal" }}
+        {% elif ostate==8 %}
+          {{ "Energiesparen Komfort" }}
+        {% else %}
+          {{ value }}
+        {% endif %}
+
+    - name: "Vitocal HK1 Komfort-Temperatur"
+      state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Comfort"
+      unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Comfort
+      object_id: 424_mixeronecircuitroomtemperaturesetpoint_comfort
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK1 Normal-Temperatur"
+      state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Standard"
+      unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Standard
+      object_id: 424_mixeronecircuitroomtemperaturesetpoint_standard
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK1 Reduziert-Temperatur"
+      state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Reduced"
+      unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Reduced
+      object_id: 424_mixeronecircuitroomtemperaturesetpoint_reduced
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK1 Solltemperatur"
+      state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
+      unique_id: 680_1643_MixerOneCircuitCurrentTemperatureSetpoint
+      object_id: 1643_mixeronecircuitcurrenttemperaturesetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    # Vitocal 250 - Heizkreis 2
+    - name: "Vitocal HK2 Vorlauftemperatur"
+      state_topic: "open3e/680_286_MixerTwoCircuitFlowTemperatureSensor/Actual"
+      unique_id: 680_286_MixerTwoCircuitFlowTemperatureSensor
+      object_id: 286_mixertwocircuitflowtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Position Mischventil"
+      state_topic: "open3e/680_476_MixerTwoCircuitThreeWayValvePositionPercent"
+      unique_id: 680_476_MixerTwoCircuitThreeWayValvePositionPercent
+      object_id: 476_mixertwocircuitthreewayvalvepositionpercent
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:valve
+      value_template: >
+        {{ float(value) / 100 }}
+
+    - name: "Vitocal HK2 Vorlauftemperatur Sollwert"
+      state_topic: "open3e/680_988_MixerTwoCircuitFlowTemperatureTargetSetpoint"
+      unique_id: 680_988_MixerTwoCircuitFlowTemperatureTargetSetpoint
+      object_id: 988_mixertwocircuitflowtemperaturetargetsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Betriebsprogramm"
+      state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/State"
+      unique_id: 680_1416_MixerTwoCircuitOperationState
+      object_id: 1416_mixertwocircuitoperationstate
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:home-variant
+      value_template: >
+        {% set ostate = int(value) %}
+        {% if ostate==0 %}
+          {{ "Abschaltbetrieb" }}
+        {% elif ostate==1 %}
+          {{ "Reduziert" }}
+        {% elif ostate==2 %}
+          {{ "Normal" }}
+        {% elif ostate==3 %}
+          {{ "Komfort" }}
+        {% elif ostate==4 %}
+          {{ "Festwert" }}
+        {% elif ostate==5 %}
+          {{ "Frostschutz" }}
+        {% elif ostate==6 %}
+          {{ "Energiesparen Reduziert" }}
+        {% elif ostate==7 %}
+          {{ "Energiesparen Normal" }}
+        {% elif ostate==8 %}
+          {{ "Energiesparen Komfort" }}
+        {% else %}
+          {{ value }}
+        {% endif %}
+
+    - name: "Vitocal HK2 Solltemperatur"
+      state_topic: "open3e/680_1644_MixerTwoCircuitCurrentTemperatureSetpoint"
+      unique_id: 680_1644_MixerTwoCircuitCurrentTemperatureSetpoint
+      object_id: 1644_mixertwocircuitcurrenttemperaturesetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    # Vitocal 250 - Kompressor
+    - name: "Vitocal Kompressor Einlauf Temperatur"
+      state_topic: "open3e/680_321_CompressorInletTemperatureSensor/Actual"
+      unique_id: 680_321_CompressorInletTemperatureSensor
+      object_id: 321_compressorinlettemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Kompressor Einlauf Druck"
+      state_topic: "open3e/680_322_CompressorInletPressureSensor/Actual"
+      unique_id: 680_322_CompressorInletPressureSensor
+      object_id: 322_compressorinletpressuresensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: pressure
+      state_class: measurement
+      icon: mdi:gauge
+      unit_of_measurement: "bar"
+
+    - name: "Vitocal Kompressor Auslauf Temperatur"
+      state_topic: "open3e/680_324_CompressorOutletTemperatureSensor/Actual"
+      unique_id: 680_324_CompressorOutletTemperatureSensor
+      object_id: 324_compressoroutlettemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Kompressor Auslauf Druck"
+      state_topic: "open3e/680_325_CompressorOutletPressureSensor/Actual"
+      unique_id: 680_325_CompressorOutletPressureSensor
+      object_id: 325_compressoroutletpressuresensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: pressure
+      state_class: measurement
+      icon: mdi:gauge
+      unit_of_measurement: "bar"
+
+    - name: "Vitocal Kompressor Öl Temperatur"
+      state_topic: "open3e/680_1772_CompressorOilTemperatureSensor/Actual"
+      unique_id: 680_1772_CompressorOilTemperatureSensor
+      object_id: 1772_compressoroiltemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal Kompressor Drehzahl Prozent"
+      state_topic: "open3e/680_2346_CompressorSpeedPercent"
+      unique_id: 680_2346_CompressorSpeedPercent
+      object_id: 2346_compressorspeedpercent
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      state_class: measurement
+      icon: mdi:fan
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Kompressor Starts"
+      state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/starts"
+      state_class: total_increasing
+      unique_id: 680_2369_HeatPumpCompressorStatistical_starts
+      object_id: 2369_heatpumpcompressorstatistical_starts
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:counter
+
+    - name: "Vitocal Kompressor Betriebsstunden"
+      state_topic: "open3e/680_2369_HeatPumpCompressorStatistical/hours"
+      state_class: total_increasing
+      unique_id: 680_2369_HeatPumpCompressorStatistical_hours
+      object_id: 2369_heatpumpcompressorstatistical_hours
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:store-clock
+
+    - name: "Vitocal Kompressor Drehzahl"
+      state_topic: "open3e/680_2569_CompressorSpeedRps"
+      unique_id: 680_2569_CompressorSpeedRps
+      object_id: 2569_compressorspeedrps
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:fan
+      unit_of_measurement: "rps"
+
+    - name: "Vitocal Zusatzheizung Starts"
+      state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/starts"
+      state_class: total_increasing
+      unique_id: 680_2370_AdditionalElectricHeaterStatistical_starts
+      object_id: 2370_additionalelectricheaterstatistical_starts
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:counter
+
+    - name: "Vitocal Zusatzheizung Betriebsstunden"
+      state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/hours"
+      state_class: total_increasing
+      unique_id: 680_2370_AdditionalElectricHeaterStatistical_hours
+      object_id: 2370_additionalelectricheaterstatistical_hours
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      icon: mdi:store-clock
+
+    - name: "Vitocal Leistungsaufnahme Zusatzheizung"
+      state_topic: "open3e/680_2487_CurrentElectricalPowerConsumptionElectricHeater"
+      unique_id: 680_2487_CurrentElectricalPowerConsumptionElectricHeater
+      object_id: 2487_currentelectricalpowerconsumptionelectricheater
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: power
+      state_class: measurement
+      icon: mdi:transmission-tower-export
+      unit_of_measurement: "W"

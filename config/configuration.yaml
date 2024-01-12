@@ -1,4 +1,3 @@
-
-modbus: !include includes/modbus.yaml
-notify: !include includes/notify.yaml
-mqtt: !include includes/mqtt.yaml
+homeassistant:
+  # load all packages from subdir packages
+  packages: !include_dir_named packages
