@@ -953,3 +953,18 @@ mqtt:
       state_class: measurement
       icon: mdi:transmission-tower-export
       unit_of_measurement: "W"
+
+template:
+  - sensor:
+      - name: "Vitocal COP Wert"
+        unique_id: open3e_cop_value
+        state_class: measurement
+        icon: mdi:sine-wave
+        state: >
+          {% set therm_power = states('sensor.2496_currentthermalcapacitysystem') | float %}
+          {% set elect_power = states('sensor.2488_currentelectricalpowerconsumptionsystem') | float %}
+          {% if (elect_power <= 0) or (therm_power<=0) %}
+          {{ float("0.0") }}
+          {% else %}
+          {{ float(therm_power / elect_power) | round(2) }}
+          {% endif %}
