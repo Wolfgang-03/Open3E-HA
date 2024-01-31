@@ -13,7 +13,7 @@ mqtt:
         - "auto"
       min_temp: 3
       max_temp: 37
-      mode_state_topic: "open3e/680_1415_MixerOneCircuitOperationState/Mode"
+      mode_state_topic: "open3e/680_1415_MixerOneCircuitOperationState/Mode/ID"
       mode_state_template: "{{'off' if value_json == 0 else 'auto'}}"
       mode_command_topic: "open3e/cmnd"
       mode_command_template: >
@@ -62,7 +62,7 @@ mqtt:
         - "auto"
       min_temp: 3
       max_temp: 37
-      mode_state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/Mode"
+      mode_state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/Mode/ID"
       mode_state_template: "{{'off' if value_json == 0 else 'auto'}}"
       mode_command_topic: "open3e/cmnd"
       mode_command_template: >
@@ -615,7 +615,7 @@ mqtt:
       icon: mdi:thermometer
 
     - name: "Vitocal HK1 Betriebsprogramm"
-      state_topic: "open3e/680_1415_MixerOneCircuitOperationState/State"
+      state_topic: "open3e/680_1415_MixerOneCircuitOperationState/State/ID"
       unique_id: 680_1415_MixerOneCircuitOperationState
       object_id: 1415_mixeronecircuitoperationstate
       device:
@@ -747,7 +747,7 @@ mqtt:
       unit_of_measurement: "°C"
 
     - name: "Vitocal HK2 Betriebsprogramm"
-      state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/State"
+      state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/State/ID"
       unique_id: 680_1416_MixerTwoCircuitOperationState
       object_id: 1416_mixertwocircuitoperationstate
       device:

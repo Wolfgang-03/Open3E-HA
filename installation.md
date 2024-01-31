@@ -65,15 +65,48 @@ sollte dann in etwa ein solches Ergebnis bringen
 
     274 OutsideTemperatureSensor {'Actual': 8.6, 'Minimum': 0.0, 'Maximum': -0.1, 'Average': 7.2, 'Unknown': 0}
 
-5. In das Verzeichnis "open3e" die Datei "args.txt" aus diesem Repository kopieren, bearbeiten und die IP-Adresse vom MQTT-Server sowie Username und Passwort für den MQTT-Server anpassen
+5. Wenn das funktioniert, dann sollte ein vollständiger Scann des Systems mit allen verfügbaren DIDs gemacht werden
+
+    python3 Open3E_depictSystem.py -s
+
+Dieser Vorgang kann 15-20 Minuten dauern, bitte geduldig bleiben. Im ersten Schritt werden die ECUs (x680..x6ff) ermittelt, auf welchen Geräte antworten. Bei mir sind das folgende ECUs: 
+
+    680: HPMUMASTER 
+    684: HMI
+    68c: VCMU
+    6c3: BACKENDGATEWAY
+    6c5: BACKENDGATEWAY
+    6cf: EHCU
+
+Danach werden bei diesen ECUs die DIDs im Bereich von 256 .. 3500 ermittelt. Bei ECU 680 (HPMUMASTER) werden relativ viele DIDs gefunden, aber je nach Anlage und Anzahl der verbauten Komponenten sind es nur sehr wenige DIDs in bei den anderen ECUs. Deshalb wird manchmal relativ lange kein Fortschritt angezeigt, geduldig bleiben. 
+
+Sobald der Scann abgeschlossen ist, sind folgende neuen Dateien im Verzeichnis "open3e" vorhanden.
+
+    devices.json
+    Open3Edatapoints_680.py
+    Open3Edatapoints_684.py
+    Open3Edatapoints_68c.py
+    Open3Edatapoints_6c3.py
+    Open3Edatapoints_6c5.py
+    Open3Edatapoints_6cf.py
+    virtdata_680.txt
+    virtdata_684.txt
+    virtdata_68c.txt
+    virtdata_6c3.txt
+    virtdata_6c5.txt
+    virtdata_6cf.txt
+
+Je nach Anlage kann das bei Euch natürlich auch anders aussehen. In der Datei "devices.json" steht, welche ECUs bei deinem System vorhanden sind. In den Dateien "Open3Edatapoints_6xx.py" steht, welche DIDs Werte geliefert haben und künftig abgefragt werden können. In den Dateien "virtdata_6xx.txt" stehen die Werte welche die Anlage zum Zeitpunkt dieses Scanns geliefert hat.  
+
+6. In das Verzeichnis "git", also unterhalb vom Verzeichnis "open3e" die Datei "args.txt" aus diesem Repository kopieren, bearbeiten und die IP-Adresse vom MQTT-Server sowie Username und Passwort für den MQTT-Server anpassen.
 
     nano args.txt
 
-Dann sollte der Befehl 
+Danach wieder in das Verzeichnis "open3e" wechseln und den Befehl 
 
-    python3 Open3Eclient.py @args.txt
+    python3 Open3Eclient.py @../args.txt
 
-dazu führen, dass alle 30 Sekunden die DIDs an den MQTT-Server geliefert werden. 
+ausführen. Das führt dazu, dass alle 30 Sekunden die DIDs an den MQTT-Server (Mosquitto broker) von Home Assistant geliefert werden. 
 
 ## Device und Entities in Home Assistant bereitstellen
 
