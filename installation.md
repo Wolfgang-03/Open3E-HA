@@ -22,8 +22,11 @@ Danach als "root" folgende Befehle ausführen.
 
 3. Linux rebooten
 
-    reboot
-    uname -a
+        reboot
+    
+    und danach folgenden Befehl eingeben.
+
+        uname -a
 
     Bei mir dann folgender Kernel angezeigt: "Linux debian10open3e 5.10.0-0.deb10.16-amd64 #1 SMP Debian 5.10.127-2bpo10+1 (2022-07-28) x86_64 GNU/Linux"
 
@@ -39,12 +42,13 @@ Danach als "root" folgende Befehle ausführen.
 
     zeigt hinter state "UP" oder "DOWN" an. Sollte er nicht "UP" sein muss der CAN initialisiert werden 
 
-    sudo ip link set can0 type can bitrate 250000
-    sudo ipconfig can0 up    
+        sudo ip link set can0 type can bitrate 250000
+        sudo ifconfig can0 up    
     
     Can-Adapter neu starten:
-    sudo ip link set can0 down
-    sudo ip link set can0 up type can bitrate 250000
+
+        sudo ip link set can0 down
+        sudo ip link set can0 up type can bitrate 250000
 
 
 ## Installation von Open3E 

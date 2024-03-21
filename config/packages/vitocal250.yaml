@@ -31,7 +31,7 @@ mqtt:
       temperature_command_topic: "open3e/cmnd"
       temperature_command_template: >
         {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
-        {% set hk1_bp = states('sensor.vitocal_hk1_betriebsprogramm') %}
+        {% set hk1_bp = states('sensor.1415_mixeronecircuitoperationstate') %}
         {% if (hk1_bp=="Komfort") %}
         {% set wert = min(max([3, value-2]),37) %}
         {% elif (hk1_bp=="Reduziert") %}
@@ -80,7 +80,7 @@ mqtt:
       temperature_command_topic: "open3e/cmnd"
       temperature_command_template: >
         {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
-        {% set hk2_bp = states('sensor.vitocal_hk2_betriebsprogramm') %}
+        {% set hk2_bp = states('sensor.1416_mixertwocircuitoperationstate') %}
         {% if (hk2_bp=="Komfort") %}
         {% set wert = min(max([3, value-2]),37) %}
         {% elif (hk2_bp=="Reduziert") %}
@@ -968,3 +968,14 @@ template:
           {% else %}
           {{ float(therm_power / elect_power) | round(2) }}
           {% endif %}
+
+      - name: "Vitocal Vorlauftemperatur Delta"
+        unique_id: open3e_MixerOneCircuitFlowTemperatureDelta
+        state_class: measurement
+        icon: mdi:sine-wave
+        state: >
+          {% set flow_target = states('sensor.987_mixeronecircuitflowtemperaturetargetsetpoint') | float %}
+          {% set flow_sensor = states('sensor.284_mixeronecircuitflowtemperaturesensor') | float %}
+          {{ float(flow_target - flow_sensor) | round(2) }}
+
+
