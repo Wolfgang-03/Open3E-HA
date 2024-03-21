@@ -1,0 +1,34 @@
+alias: HK1_default_temperature
+sequence:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: sensor.1415_mixeronecircuitoperationstate
+            state: Reduziert
+        sequence:
+          - service: climate.set_temperature
+            data:
+              temperature: "{{ 20 }}"
+            target:
+              entity_id: climate.open3e_vitocal250a_heizkreis_1
+      - conditions:
+          - condition: state
+            entity_id: sensor.1415_mixeronecircuitoperationstate
+            state: Normal
+        sequence:
+          - service: climate.set_temperature
+            data:
+              temperature: "{{ 22 }}"
+            target:
+              entity_id: climate.open3e_vitocal250a_heizkreis_1
+      - conditions:
+          - condition: state
+            entity_id: sensor.1415_mixeronecircuitoperationstate
+            state: Komfort
+        sequence:
+          - service: climate.set_temperature
+            data:
+              temperature: "{{ 24 }}"
+            target:
+              entity_id: climate.open3e_vitocal250a_heizkreis_1
+mode: single
