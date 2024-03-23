@@ -1,4 +1,57 @@
 mqtt:
+  number:
+    - name: "Heizkreis 1 Pumpe"
+      unique_id: open3e_Heizkreis1_Pumpe
+      object_id: open3e_hk1pumpe
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: power_factor
+      min: 20
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      state_topic: "open3e/680_1102_MixerOneCircuitPumpMinimumMaximumLimit/Setpoint"
+      command_topic: "open3e/cmnd"
+      # MinSpeed = $14 = #20
+      # MaxSpeed = $64 = #100
+      # Setpoint = value
+      command_template: >
+        {% set intvalue = value | int %}
+        {% set cmddata = '1464' + '%0x' % intvalue %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[1102, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:pump
+
+    - name: "Heizkreis 2 Pumpe"
+      unique_id: open3e_Heizkreis2_Pumpe
+      object_id: open3e_hk2pumpe
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: power_factor
+      min: 20
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      state_topic: "open3e/680_1103_MixerTwoCircuitPumpMinimumMaximumLimit/Setpoint"
+      command_topic: "open3e/cmnd"
+      # MinSpeed = $14 = #20
+      # MaxSpeed = $64 = #100
+      # Setpoint = value
+      command_template: >
+        {% set intvalue = value | int %}
+        {% set cmddata = '1464' + '%0x' % intvalue %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[1103, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:pump
+
   climate:
     - name: Heizkreis 1
       unique_id: open3e_heizkreis1
@@ -966,7 +1019,7 @@ template:
           {% if (elect_power <= 0) or (therm_power<=0) %}
           {{ float("0.0") }}
           {% else %}
-          {{ float(therm_power / elect_power) | round(2) }}
+          {{ min(float(therm_power / elect_power),8) | round(2) }}
           {% endif %}
 
       - name: "Vitocal Vorlauftemperatur Delta"

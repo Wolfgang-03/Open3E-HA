@@ -31,4 +31,9 @@ sequence:
               temperature: "{{ 24 }}"
             target:
               entity_id: climate.open3e_vitocal250a_heizkreis_1
+  - service: number.set_value
+    target:
+      entity_id: number.open3e_hk1pumpe
+    data:
+      value: "90"
 mode: single
