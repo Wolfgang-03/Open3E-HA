@@ -1,5 +1,31 @@
 mqtt:
   number:
+    - name: "Primärpumpe Wärmeerzeuger"
+      unique_id: open3e_CentralHeatingPump_Control
+      object_id: open3e_centralheatingpumpcontrol
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: power_factor
+      min: 20
+      max: 100
+      step: 5
+      unit_of_measurement: "%"
+      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/Setpoint"
+      command_topic: "open3e/cmnd"
+      # MinSpeed = $14 = #20
+      # MaxSpeed = value   // ($64 = #100)
+      # Setpoint = value
+      command_template: >
+        {% set intvalue = value | int %}
+        {% set cmddata = '14' + '%0x' % intvalue + '%0x' % intvalue %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[1100, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:pump
+
     - name: "Heizkreis 1 Pumpe"
       unique_id: open3e_Heizkreis1_Pumpe
       object_id: open3e_hk1pumpe
@@ -343,7 +369,7 @@ mqtt:
         model: "Vitocal 250-A"
       device_class: speed
       state_class: measurement
-      icon: mdi:fan
+      icon: mdi:pump
       unit_of_measurement: "%"
 
     - name: "Vitocal Position Erweiterungsventil 1"
@@ -406,6 +432,45 @@ mqtt:
       state_class: measurement
       icon: mdi:gauge
       unit_of_measurement: "m³/h"
+
+    - name: "Vitocal Primärpumpe Minimalbegrenzung"
+      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/MinSpeed"
+      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_MinSpeed
+      object_id: 1100_centralheatingpumpminimummaximumlimitminspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Primärpumpe Maximalbegrenzung"
+      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/MaxSpeed"
+      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_MaxSpeed
+      object_id: 1100_centralheatingpumpminimummaximumlimitmaxspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Primärpumpe Standardwert"
+      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/Setpoint"
+      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_Setpoint
+      object_id: 1100_centralheatingpumpminimummaximumlimitsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
 
     - name: "Vitocal Primäre Einlauftemperatur"
       state_topic: "open3e/680_1769_PrimaryInletTemperatureSensor/Actual"
@@ -625,6 +690,45 @@ mqtt:
       icon: mdi:thermometer
       unit_of_measurement: "°C"
 
+    - name: "Vitocal Warmwasser Pumpe Minimalbegrenzung"
+      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/MinSpeed"
+      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_MinSpeed
+      object_id: 1101_domestichotwaterpumpminimummaximumlimitminspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Warmwasser Pumpe Maximalbegrenzung"
+      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/MaxSpeed"
+      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_MaxSpeed
+      object_id: 1101_domestichotwaterpumpminimummaximumlimitmaxspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Warmwasser Pumpe Standardwert"
+      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/Setpoint"
+      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_Setpoint
+      object_id: 1101_domestichotwaterpumpminimummaximumlimitsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
     # Vitocal 250 - Heizkreis 1
     - name: "Vitocal HK1 Vorlauftemperatur"
       state_topic: "open3e/680_284_MixerOneCircuitFlowTemperatureSensor/Actual"
@@ -666,6 +770,72 @@ mqtt:
       state_class: measurement
       unit_of_measurement: "°C"
       icon: mdi:thermometer
+
+    - name: "Vitocal HK1 Pumpe Minimalbegrenzung"
+      state_topic: "open3e/680_1102_MixerOneCircuitPumpMinimumMaximumLimit/MinSpeed"
+      unique_id: 680_1102_MixerOneCircuitPumpMinimumMaximumLimit_MinSpeed
+      object_id: 1102_mixeronecircuitpumpminimummaximumlimitminspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK1 Pumpe Maximalbegrenzung"
+      state_topic: "open3e/680_1102_MixerOneCircuitPumpMinimumMaximumLimit/MaxSpeed"
+      unique_id: 680_1102_MixerOneCircuitPumpMinimumMaximumLimit_MaxSpeed
+      object_id: 1102_mixeronecircuitpumpminimummaximumlimitmaxspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK1 Pumpe Standardwert"
+      state_topic: "open3e/680_1102_MixerOneCircuitPumpMinimumMaximumLimit/Setpoint"
+      unique_id: 680_1102_MixerOneCircuitPumpMinimumMaximumLimit_Setpoint
+      object_id: 1102_mixeronecircuitpumpminimummaximumlimitsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK1 Pumpe Status"
+      state_topic: "open3e/680_2792_MixerOneCircuitPumpStatus"
+      unique_id: 680_2792_MixerOneCircuitPumpStatus
+      object_id: 2792_mixeronecircuitpumpstatus
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Primärpumpe Status"
+      state_topic: "open3e/680_2791_CentralHeatingPumpStatus"
+      unique_id: 680_2791_CentralHeatingPumpStatus
+      object_id: 2791_centralheatingpumpstatus
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      state_class: measurement
+      icon: mdi:pump
+      unit_of_measurement: "%"
 
     - name: "Vitocal HK1 Betriebsprogramm"
       state_topic: "open3e/680_1415_MixerOneCircuitOperationState/State/ID"
@@ -798,6 +968,58 @@ mqtt:
       state_class: measurement
       icon: mdi:thermometer
       unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Pumpe Minimalbegrenzung"
+      state_topic: "open3e/680_1103_MixerTwoCircuitPumpMinimumMaximumLimit/MinSpeed"
+      unique_id: 680_1103_MixerTwoCircuitPumpMinimumMaximumLimit_MinSpeed
+      object_id: 1103_mixertwocircuitpumpminimummaximumlimitminspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK2 Pumpe Maximalbegrenzung"
+      state_topic: "open3e/680_1103_MixerTwoCircuitPumpMinimumMaximumLimit/MaxSpeed"
+      unique_id: 680_1103_MixerTwoCircuitPumpMinimumMaximumLimit_MaxSpeed
+      object_id: 1103_mixertwocircuitpumpminimummaximumlimitmaxspeed
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK2 Pumpe Standardwert"
+      state_topic: "open3e/680_1103_MixerTwoCircuitPumpMinimumMaximumLimit/Setpoint"
+      unique_id: 680_1103_MixerTwoCircuitPumpMinimumMaximumLimit_Setpoint
+      object_id: 1103_mixertwocircuitpumpminimummaximumlimitsetpoint
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal HK2 Pumpe Status"
+      state_topic: "open3e/680_2793_MixerTwoCircuitPumpStatus"
+      unique_id: 680_2793_MixerTwoCircuitPumpStatus
+      object_id: 2793_mixertwocircuitpumpstatus
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: speed
+      icon: mdi:pump
+      unit_of_measurement: "%"
 
     - name: "Vitocal HK2 Betriebsprogramm"
       state_topic: "open3e/680_1416_MixerTwoCircuitOperationState/State/ID"
