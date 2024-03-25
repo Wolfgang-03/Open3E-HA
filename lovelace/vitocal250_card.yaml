@@ -59,8 +59,14 @@ cards:
         name: Raumtemperatur Sollwert
       - entity: binary_sensor.2855_mixeronecircuitfrostprotectionconfiguration
         name: Status Frostschutz
+      - entity: sensor.475_mixeronecircuitthreewayvalvepositionpercent
+        name: Position Mischventil
       - entity: binary_sensor.401_mixeronecircuitpump
         name: Status Pumpe HK1
+      - entity: number.open3e_hk1pumpe
+        name: Sollwert Pumpe HK1
+      - entity: sensor.2792_mixeronecircuitpumpstatus
+        name: Istwert Pumpe HK1
       - entity: sensor.987_mixeronecircuitflowtemperaturetargetsetpoint
         name: Vorlauftemperatur Sollwert
       - entity: sensor.284_mixeronecircuitflowtemperaturesensor

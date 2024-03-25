@@ -1,31 +1,5 @@
 mqtt:
   number:
-    - name: "Primärpumpe Wärmeerzeuger"
-      unique_id: open3e_CentralHeatingPump_Control
-      object_id: open3e_centralheatingpumpcontrol
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-        suggested_area: "Heizung"
-      device_class: power_factor
-      min: 20
-      max: 100
-      step: 5
-      unit_of_measurement: "%"
-      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/Setpoint"
-      command_topic: "open3e/cmnd"
-      # MinSpeed = $14 = #20
-      # MaxSpeed = value   // ($64 = #100)
-      # Setpoint = value
-      command_template: >
-        {% set intvalue = value | int %}
-        {% set cmddata = '14' + '%0x' % intvalue + '%0x' % intvalue %}
-        {% set cmd = {'mode': 'write-raw', 'data': [[1100, cmddata]]} %}
-        {{ cmd | to_json }}
-      icon: mdi:pump
-
     - name: "Heizkreis 1 Pumpe"
       unique_id: open3e_Heizkreis1_Pumpe
       object_id: open3e_hk1pumpe
@@ -109,18 +83,23 @@ mqtt:
       temperature_state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
       temperature_command_topic: "open3e/cmnd"
       temperature_command_template: >
-        {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
+        {% set value_target = (value*10) | int %}
         {% set hk1_bp = states('sensor.1415_mixeronecircuitoperationstate') %}
         {% if (hk1_bp=="Komfort") %}
-        {% set wert = min(max([3, value-2]),37) %}
-        {% elif (hk1_bp=="Reduziert") %}
-        {% set wert = min(max([3, value+2]),37) %}
-        {% elif (hk1_bp=="Frostschutz") %}
-        {% set wert = min(max([3, value+2]),37) %}
+        {% set value_com = min(max(30, value_target),370) %}
+        {% set value_sta = min(max(30, value_target-20),370) %}
+        {% set value_red = min(max(30, value_target-40),370) %}
+        {% elif (hk1_bp=="Reduziert") or (hk1_bp=="Frostschutz") or (hk1_bp=="Abschaltbetrieb") %}
+        {% set value_com = min(max(30, value_target+40),370) %}
+        {% set value_sta = min(max(30, value_target+20),370) %}
+        {% set value_red = min(max(30, value_target),370) %}
         {% else %}
-        {% set wert = value %}
+        {% set value_com = min(max(30, value_target+20),370) %}
+        {% set value_sta = min(max(30, value_target),370) %}
+        {% set value_red = min(max(30, value_target-20),370) %}
         {% endif %}
-        {% set cmd = {'mode': 'write-raw', 'data':[[424, values[wert]]]} %}
+        {% set cmddata = '%02x' % (value_com % 256) + '%02x' % (value_com // 256) + '%02x' % (value_sta % 256) + '%02x' % (value_sta // 256) + '%02x' % (value_red % 256) + '%02x' % (value_red // 256) + '000000' %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[424, cmddata]]} %}
         {{ cmd | to_json }}
       current_temperature_topic: "zigbee2mqtt/Heizung Wohnzimmer"
       current_temperature_template: >
@@ -158,18 +137,23 @@ mqtt:
       temperature_state_topic: "open3e/680_1644_MixerTwoCircuitCurrentTemperatureSetpoint"
       temperature_command_topic: "open3e/cmnd"
       temperature_command_template: >
-        {% set values = { 3:'1e001e001e00000000', 4:'3c0028001e00000000', 5:'460032001e00000000', 6:'50003c002800000000', 7:'5a0046003200000000', 8:'640050003c00000000', 9:'6e005a004600000000', 10:'780064005000000000', 11:'82006e005a00000000', 12:'8c0078006400000000',13:'960082006e00000000', 14:'a0008c007800000000', 15:'aa0096008200000000', 16:'b400a0008c00000000', 17:'be00aa009600000000', 18:'c800b400a000000000', 19:'d200be00aa00000000', 20:'dc00c800b400000000', 21:'e600d200be00000000', 22:'f000dc00c800000000', 23:'fa00e600d200000000', 24:'0401f000dc00000000', 25:'0e01fa00e600000000', 26:'18010401f000000000',27:'22010e01fa00000000', 28:'2c0118010401000000', 29:'360122010e01000000', 30:'40012c011801000000', 31:'4a0136012201000000', 32:'540140012c01000000', 33:'5e014a013601000000', 34:'680154014001000000', 35:'72015e014a01000000', 36:'720168015401000000', 37:'720172017201000000'} %}
+        {% set value_target = (value*10) | int %}
         {% set hk2_bp = states('sensor.1416_mixertwocircuitoperationstate') %}
         {% if (hk2_bp=="Komfort") %}
-        {% set wert = min(max([3, value-2]),37) %}
-        {% elif (hk2_bp=="Reduziert") %}
-        {% set wert = min(max([3, value+2]),37) %}
-        {% elif (hk2_bp=="Frostschutz") %}
-        {% set wert = min(max([3, value+2]),37) %}
+        {% set value_com = min(max(30, value_target),370) %}
+        {% set value_sta = min(max(30, value_target-20),370) %}
+        {% set value_red = min(max(30, value_target-40),370) %}
+        {% elif (hk2_bp=="Reduziert") or (hk2_bp=="Frostschutz") or (hk2_bp=="Abschaltbetrieb") %}
+        {% set value_com = min(max(30, value_target+40),370) %}
+        {% set value_sta = min(max(30, value_target+20),370) %}
+        {% set value_red = min(max(30, value_target),370) %}
         {% else %}
-        {% set wert = value %}
+        {% set value_com = min(max(30, value_target+20),370) %}
+        {% set value_sta = min(max(30, value_target),370) %}
+        {% set value_red = min(max(30, value_target-20),370) %}
         {% endif %}
-        {% set cmd = {'mode': 'write-raw', 'data':[[426, values[wert]]]} %}
+        {% set cmddata = '%02x' % (value_com % 256) + '%02x' % (value_com // 256) + '%02x' % (value_sta % 256) + '%02x' % (value_sta // 256) + '%02x' % (value_red % 256) + '%02x' % (value_red // 256) + '000000' %}
+        {% set cmd = {'mode': 'write-raw', 'data':[[426, cmddata]]} %}
         {{ cmd | to_json }}
 
   binary_sensor:
@@ -932,6 +916,48 @@ mqtt:
       state_topic: "open3e/680_286_MixerTwoCircuitFlowTemperatureSensor/Actual"
       unique_id: 680_286_MixerTwoCircuitFlowTemperatureSensor
       object_id: 286_mixertwocircuitflowtemperaturesensor
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Komfort-Temperatur"
+      state_topic: "open3e/680_426_MixerTwoCircuitRoomTemperatureSetpoint/Comfort"
+      unique_id: 680_426_MixerTwoCircuitRoomTemperatureSetpoint_Comfort
+      object_id: 426_mixermwocircuitroomtemperaturesetpoint_comfort
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Normal-Temperatur"
+      state_topic: "open3e/680_426_MixerTwoCircuitRoomTemperatureSetpoint/Standard"
+      unique_id: 680_426_MixerTwoCircuitRoomTemperatureSetpoint_Standard
+      object_id: 426_mixermwocircuitroomtemperaturesetpoint_standard
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: "S/N 1234567890123456"
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      state_class: measurement
+      icon: mdi:thermometer
+      unit_of_measurement: "°C"
+
+    - name: "Vitocal HK2 Reduziert-Temperatur"
+      state_topic: "open3e/680_426_MixerTwoCircuitRoomTemperatureSetpoint/Reduced"
+      unique_id: 680_426_MixerTwoCircuitRoomTemperatureSetpoint_Reduced
+      object_id: 426_mixermwocircuitroomtemperaturesetpoint_reduced
       device:
         name: "Open3e_Vitocal250A"
         identifiers: "S/N 1234567890123456"

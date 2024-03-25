@@ -119,7 +119,7 @@ Ich binde die verschiedenen Geräte mittels "packages" ein. Das hat den Vorteil,
     homeassistant:
       packages: !include_dir_named packages
 
-Ferner muss im "File editor" im Home Assistant das Unterverzeichnis "packages" angelegt werden, in welches dann die "vitocal250.yaml" kopiert wird. Mit der vitocal250.yaml werden alle Entitäten (Sensoren, binäre Sensoren und Regler) automatisch angelegt. Dabei bekommt jede Entität sowohl eine "unique_id", einen deutschen Namen, eine Zuordnung zum Device "Open3e_Vitocal250A", ein passendes Icon und eine fest vorgegebene "entity_id" (=object_id). Der Indentifier beim Device sollte/kann natürlich durch die Seriennummer des eigenen Gerätes ersetzt werden. Da habe ich jetzt nur einen Dummy eingetragen. Nach einem Neustart von Home Assistant sollten dann alle Entitäten verfügbar sein. 
+Ferner muss im "File editor" im Home Assistant das Unterverzeichnis "packages" angelegt werden, in welches dann die "vitocal250.yaml" kopiert wird. Mit der vitocal250.yaml werden alle Entitäten (Sensoren, binäre Sensoren und Regler) automatisch angelegt. Dabei bekommt jede Entität sowohl eine "unique_id", einen deutschen Namen, eine Zuordnung zum Device "Open3e_Vitocal250A", ein passendes Icon und eine fest vorgegebene "entity_id" (=object_id). Der Indentifier beim Device sollte natürlich durch die Seriennummer des eigenen Gerätes ersetzt werden. Nach einem Neustart von Home Assistant sollten dann alle Entitäten verfügbar sein. 
 
 ## Visualisierung in Home Assistant 
 
@@ -137,6 +137,6 @@ Zuerst muss die Datei "kreislauf.png" mittels "File editor" im Home Assistant in
 
 Im Home Assistant kann über "Device" auf die Regler von "Heizkreis 1" und "Heizkreis 2" zugegriffen werden. Diese Regler ermöglichen es auch die Einstellungen des jeweiligen Heizkreises direkt aus Home Assistant zu ändern. Ich habe das dabei so programmiert, dass bei einer Temperaturänderung immer automatisch die Temperatur für alle 3 Betriebsprogramme geändert wird. Das bedeutet, je nach dem in welchem Betriebsprogramm (Reduziert, Normal, Komfort) sich der Heizkreis aktuell befindet, wird die Temperatur immer für die 3 Programme mit einem Abstand von 2 °C eingestellt. 
 Beispiel 1: Befindet sich HK1 im Programm "Normal" bei 20 °C und wird die Temperatur auf 22 °C erhöht, dann wird "Reduziert" auf 20 °C, "Normal" auf 22 °C und "Komfort" auf 24 °C eingestellt. 
-Beispiel 1: Befindet sich HK1 im Programm "Komfort" bei 20 °C und wird die Temperatur auf 22 °C erhöht, dann wird "Reduziert" auf 18 °C, "Normal" auf 20 °C und "Komfort" auf 22 °C eingestellt. 
+Beispiel 2: Befindet sich HK1 im Programm "Komfort" bei 20 °C und wird die Temperatur auf 22 °C erhöht, dann wird "Reduziert" auf 18 °C, "Normal" auf 20 °C und "Komfort" auf 22 °C eingestellt. 
 
 ![Regler](./pictures/HA_Control.jpg)

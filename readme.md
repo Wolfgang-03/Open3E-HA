@@ -14,7 +14,7 @@ Installation instructions: [Installation](./installation.md)
 
 I start the Open3E client with the following call: 
 
-    python3 Open3Eclient.py @args.txt
+    python3 Open3Eclient.py @../args.txt
 
     -> args.txt : The following values must be adjusted: --mqtt (ip), --mqttuser (username and password)
 
@@ -23,4 +23,6 @@ I then have the data points in the MQTT server with this structure:
     open3e/680_274_OutsideTemperatureSensor/Actual
 
 In HA, I have created a folder "packages", which then contains the `vitocal250.yaml` files.
+
+A complete installation guide is here: [installation.md](installation.md)
 
