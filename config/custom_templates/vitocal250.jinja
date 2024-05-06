@@ -1,0 +1,61 @@
+# Format entity for output
+{%- macro format_entity(entity_id) -%}
+{{ state_attr(entity_id, 'friendly_name').replace('Open3e_Vitocal250A ','') }}: {{ states(entity_id) }} 
+{%- if state_attr(entity_id, 'unit_of_measurement') != none -%}
+  {{ " " }}{{ state_attr(entity_id, 'unit_of_measurement') }}
+{%- endif -%}
+{%- if ('binary_sensor' in entity_id) or ('input_boolean' in entity_id) -%}
+{{ " for " }}{{ relative_time(states[entity_id].last_changed) }} ({{ states[entity_id].last_changed | as_timestamp | timestamp_custom('%d.%m.%Y, %H:%M:%S') }})
+{%- endif -%}
+{%- endmacro -%}
+
+# Convert datetime to seconds 
+{%- macro age_seconds(dt) -%}
+  {%- if dt > now() -%}
+    {%- set age = dt - now() -%}
+  {%- else -%}
+    {%- set age = now() - dt -%}
+  {%- endif -%}  
+  {{ age.total_seconds() | int // 1 }}
+{%- endmacro -%}
+
+# Convert datetime to "age_time"
+{%- macro age_time(dt) -%}
+{%- set seconds = age_seconds(dt) | int // 1 %}
+{%- set agetime = '%02d' % (seconds // 3600) + ':%02d' % (seconds % 3600 // 60) + ':%02d' % (seconds % 60) %}{{ agetime }}
+{%- endmacro -%}
+
+# State and age from binary_sensor for csv
+{%- macro binary_state_age_csv(entity_id) -%}
+{%- set agetime = age_time(states[entity_id].last_changed) %}{{ states[entity_id].state }};{{ agetime }};
+{%- endmacro -%}
+
+{%- macro seconds_today(dt) -%}
+  {%- set dt_today = today_at('00:00:00') -%}
+  {%- set age_today = dt - dt_today -%}
+  {{ age_today.total_seconds() | int // 1 }}
+{%- endmacro -%}
+
+{%- macro macro_vc250_hk1_states() %}
+{{ format_entity('sensor.274_outsidetemperaturesensor') }}
+{{ format_entity('sensor.3016_heatingbuffertemperaturesensor') }}
+{{ format_entity('sensor.1415_mixeronecircuitoperationstate') }}
+{{ format_entity('sensor.2792_mixeronecircuitpumpstatus') }}
+{{ format_entity('sensor.987_mixeronecircuitflowtemperaturetargetsetpoint') }}
+{{ format_entity('sensor.284_mixeronecircuitflowtemperaturesensor') }}
+{{ format_entity('sensor.vitocal_hk1_vorlauftemperatur_delta') }}
+{{ format_entity('sensor.vitocal_pv_mode_target_soc') }}
+{{ format_entity('input_boolean.vitocal_hk1_automation_pv_mode') }}
+{{ format_entity('input_boolean.vitocal_hk1_automation_off') }}
+{{ format_entity('input_boolean.vitocal_hk1_automation_off_pv_mode') }}
+{% endmacro -%}
+
+{%- macro macro_current_time() %}
+{%- set ts_rising = (states.sun.sun.attributes.next_rising | as_timestamp) %}
+{%- set age_rising = age_seconds(states.sun.sun.attributes.next_rising | as_datetime) %}
+{%- set ts_setting = (states.sun.sun.attributes.next_setting | as_timestamp) %}
+{%- set age_setting = age_seconds(states.sun.sun.attributes.next_setting | as_datetime) %}
+Aktuelle Zeit  : {{ now().timestamp() | timestamp_custom('%d.%m.%Y, %H:%M:%S') }}
+Sonnenaufgang  : {{ ts_rising | timestamp_custom('%d.%m.%Y, %H:%M:%S') }} in {{ age_rising | int // 3600 }} Stunden und {{ age_rising | int % 3600 // 60 }} Minuten
+Sonnenuntergang: {{ (ts_setting | timestamp_custom('%d.%m.%Y, %H:%M:%S')) }} in {{ age_setting | int // 3600 }} Stunden und {{ age_setting | int % 3600 // 60 }} Minuten
+{% endmacro -%}

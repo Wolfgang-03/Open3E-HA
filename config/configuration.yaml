@@ -1,3 +1,26 @@
+automation: !include automations.yaml
+script: !include scripts.yaml
+
 homeassistant:
   # load all packages from subdir packages
   packages: !include_dir_named packages
+
+notify:
+  - platform: group
+    name: "Notify Vitocal"
+    services:
+      - service: mobile_app_xxx
+      - service: email_to_xxx
+
+  - platform: group
+    name: "Notify Vitocal Debug"
+    services:
+      - service: email_to_xxx
+
+  - name: vitocal_status_log
+    platform: file
+    filename: /config/www/csv_logs/vitocal_log.csv
+    timestamp: false
+
+# include this subdir for python-scripts
+python_script:

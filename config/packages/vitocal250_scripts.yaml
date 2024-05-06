@@ -1,0 +1,380 @@
+script:
+
+  vitocal_write_status_log:
+    alias: "Vitocal write status log"
+    mode: single
+    icon: mdi:script-text-outline
+    sequence:
+      # Kopfzeile schreiben, wenn Datei leer oder nicht vorhanden
+      - if:
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: "{{ states.sensor.vitocal_log_csv_grosse_in_bytes.state == 'unavailable'}}"
+              - condition: numeric_state
+                entity_id: sensor.vitocal_log_csv_grosse_in_bytes
+                below: 250
+        then:
+          - service: notify.vitocal_status_log
+            data:
+              message: >-
+                {{ 'log.date;log.time;next_rising;next_setting;battery soc;discharging.stat;discharging.time;' }}
+                {{ 'charing_1000.state;charing_1000.time;charing_4000.state;charing_4000.time;' }}
+                {{ 'grid_export_1000.state;grid_export_1000.time;grid_export_4000.state;grid_export_4000.time;' }}
+                {{ 'outside.temperature;buffer.temperature;HK1.state;HK1.pumpe;HK1.target.temp;HK1.current.temp;' }}
+                {{ 'HK1.delta.temp;target soc for pv-mode;HK1.pv_mode;HK1.off_by_automation;HK1.off_by_pv_mode;' }}
+      # Die aktuellen Werte in die Datei schreiben
+      - service: notify.vitocal_status_log
+        data:
+          message: >-
+            {% import 'vitocal250.jinja' as vc250 with context %}                 
+            {{ now().timestamp() | timestamp_custom('%d.%m.%Y;%H:%M:%S') }};
+            {{ vc250.age_time(states.sun.sun.attributes.next_rising | as_datetime) }};
+            {{ vc250.age_time(states.sun.sun.attributes.next_setting | as_datetime) }};
+            {{ states.sensor.e3dc_battery_state_of_charge.state }}%;
+            {{ vc250.binary_state_age_csv('binary_sensor.e3dc_battery_discharging') }}
+            {{ vc250.binary_state_age_csv('binary_sensor.e3dc_battery_charging_above_1000') }}
+            {{ vc250.binary_state_age_csv('binary_sensor.e3dc_battery_charging_above_4000') }}
+            {{ vc250.binary_state_age_csv('binary_sensor.e3dc_grid_export_above_1000') }}
+            {{ vc250.binary_state_age_csv('binary_sensor.e3dc_grid_export_above_4000') }}
+            {{ states('sensor.274_outsidetemperaturesensor') }};
+            {{ states('sensor.3016_heatingbuffertemperaturesensor') }};
+            {{ states('sensor.1415_mixeronecircuitoperationstate') }};
+            {{ states('sensor.2792_mixeronecircuitpumpstatus') }}%;
+            {{ states('sensor.987_mixeronecircuitflowtemperaturetargetsetpoint') }};
+            {{ states('sensor.284_mixeronecircuitflowtemperaturesensor') }};
+            {{ states('sensor.vitocal_hk1_vorlauftemperatur_delta') }};
+            {{ states('sensor.vitocal_pv_mode_target_soc') }}%;
+            {{ states('input_boolean.vitocal_hk1_automation_pv_mode') }};
+            {{ states('input_boolean.vitocal_hk1_automation_off') }};
+            {{ states('input_boolean.vitocal_hk1_automation_off_pv_mode') }};
+
+  # Set 424_MixerOneCircuitRoomTemperatureSetpoint_Comfort to "temperature+2"
+  # Set 424_MixerOneCircuitRoomTemperatureSetpoint_Standard to "temperature"
+  # Set 424_MixerOneCircuitRoomTemperatureSetpoint_Reduced to "temperature-2"
+  vitocal_set_424_hk1_setpoint:
+    alias: Vitocal Set 424 HK1 Setpoint
+    icon: mdi:script-text-outline
+    mode: queued
+    fields:
+      temperature:
+        name: Temperatur
+        description: "Set 424_MixerOneCircuitRoomTemperatureSetpoint_Standard to this value"
+        required: true
+        example: "20"
+        selector:
+          number:
+            min: 3
+            max: 37
+            step: 1
+            unit_of_measurement: °C
+            mode: slider
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: false
+        example: true
+    sequence:
+      - service: mqtt.publish
+        data:
+          qos: "2"
+          retain: false
+          topic: open3e/cmnd
+          payload_template: >-
+            {% set value_target = (( temperature | int) *10) %}
+            {% set value_com = min(max(30, value_target+20),370) %}
+            {% set value_sta = min(max(30, value_target),370) %}
+            {% set value_red = min(max(30, value_target-20),370) %}
+            {% set cmddata = '%02x' % (value_com % 256) + '%02x' % (value_com // 256) + '%02x' % (value_sta % 256) + '%02x' % (value_sta // 256) + '%02x' % (value_red % 256) + '%02x' % (value_red // 256) + '000000' %}
+            {{ '{\"mode\":\"write-raw\",\"data\":[[424,\"' + cmddata + '\"]]}' }}
+      # Change entity-values to display change immediately
+      - service: python_script.set_state
+        data_template:
+          entity_id: sensor.424_mixeronecircuitroomtemperaturesetpoint_comfort
+          state: "{{ ( temperature | float + 2) }}"
+      - service: python_script.set_state
+        data_template:
+          entity_id: sensor.424_mixeronecircuitroomtemperaturesetpoint_standard
+          state: "{{ ( temperature | float) }}"
+      - service: python_script.set_state
+        data_template:
+          entity_id: sensor.424_mixeronecircuitroomtemperaturesetpoint_reduced
+          state: "{{ ( temperature | float - 2) }}"
+      # send notification if requested
+      - if:
+          - condition: template
+            value_template: "{{ sendnotify }}"
+        then:
+          - service: notify.notify_vitocal_debug
+            data:
+              title: "Vitocal 250 - script.vitocal_set_424_hk1_setpoint"
+              message: "HK1 Standard-RoomTemperatureSetpoint changed to {{ ( temperature | float) }} °C"
+
+  # HK1 Soll-Temperatur (1643_mixeronecircuitcurrenttemperaturesetpoint) auf den Wert setzen,
+  # der mit dem Parameter "temperature" an dieses Script übergeben wird
+  hk1_set_current_temperature:
+    alias: HK1_Set_current_temperature
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Temperatur von HK1 in Abhängigkeit des aktiven Betriebsprogramms so setzen, dass '1643 = Raumtemperatur Sollwert' auf diesem Wert steht"
+    fields:
+      temperature:
+        name: Temperatur
+        description: "Set 1643_mixeronecircuitcurrenttemperaturesetpoint to this value"
+        required: true
+        example: "20"
+        selector:
+          number:
+            min: 3
+            max: 37
+            step: 1
+            unit_of_measurement: °C
+            mode: slider
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: false
+        example: true
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ (states('sensor.1643_mixeronecircuitcurrenttemperaturesetpoint') | int) != (temperature | int) }}"
+        then:
+          - service: climate.set_temperature
+            data:
+              temperature: "{{ temperature }}"
+            target:
+              entity_id: climate.open3e_vitocal250a_heizkreis_1
+          # Wert von 1643 für Anzeige sofort ändern
+          - service: python_script.set_state
+            data_template:
+              entity_id: sensor.1643_mixeronecircuitcurrenttemperaturesetpoint
+              state: "{{ ( temperature | float) }}"
+          - if:
+              - condition: template
+                value_template: "{{ sendnotify }}"
+            then:
+              - service: notify.notify_vitocal_debug
+                data:
+                  title: "Vitocal 250 - hk1_set_current_temperature"
+                  message: "Aktuelle-Temperatur wurde auf {{ ( temperature | float) }} Grad gesetzt"
+
+  # HK1 Temperatur um 1 oder 3 Grad erhöhen
+  hk1_increase_temperature:
+    alias: HK1_increase_temperature
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Increase 1643_mixeronecircuitcurrenttemperaturesetpoint by 1 or 3 degrees (PV-Mode)"
+    fields:
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: true
+        example: true
+      pvmode:
+        name: pvmode
+        description: "If true, target_temp =, else target_temp = vitocal_hk1_normaltemperature"
+        required: false
+        default: true
+        example: true
+    variables:
+      flow_delta: "{{ states('sensor.vitocal_hk1_vorlauftemperatur_delta') }}"
+      normal_temp: "{{ states('input_number.vitocal_hk1_normaltemperature') }}"
+      pv_temp: "{{ states('input_number.vitocal_hk1_max_pv_temperature') }}"
+      cur_setpoint: "{{ states('sensor.1643_mixeronecircuitcurrenttemperaturesetpoint') }}"
+    sequence:
+      - service: climate.set_temperature
+        data:
+          temperature: >
+            {% if (pvmode) %}
+              {% if (flow_delta <= 1) and (cur_setpoint+3<pv_temp) %}
+                {{ cur_setpoint + 3 }}
+              {% else %}  
+                {{ cur_setpoint + 1 }}
+              {% endif %}
+            {% else %}
+              {% if (flow_delta <= 1) and (cur_setpoint+3<normal_temp) %}
+                {{ cur_setpoint + 3 }}
+              {% else %}  
+                {{ cur_setpoint + 1 }}
+              {% endif %}
+            {% endif %}
+        target:
+          entity_id: climate.open3e_vitocal250a_heizkreis_1
+      - if:
+          - condition: template
+            value_template: "{{ sendnotify }}"
+        then:
+          - service: notify.notify_vitocal_debug
+            data:
+              title: "Vitocal 250 - hk1_increase_temperature"
+              message: |
+                {% import 'vitocal250.jinja' as vc250 with context %}                 
+                {% if (pvmode) %}
+                  {% if (flow_delta <= 1) and (cur_setpoint+3<pv_temp) %}
+                    Temperatur wurde um 3 Grad von {{ cur_setpoint }} Grad auf {{ cur_setpoint + 3 }} Grad erhöht (PV-Mode)
+                  {% else %}  
+                    Temperatur wurde um 1 Grad von {{ cur_setpoint }} Grad auf {{ cur_setpoint + 1 }} Grad erhöht (PV-Mode)
+                  {% endif %}
+                {% else %}
+                  {% if (flow_delta <= 1) and (cur_setpoint+3<normal_temp) %}
+                    Temperatur wurde um 3 Grad von {{ cur_setpoint }} Grad auf {{ cur_setpoint + 3 }} Grad erhöht
+                  {% else %}  
+                    Temperatur wurde um 1 Grad von {{ cur_setpoint }} Grad auf {{ cur_setpoint + 1 }} Grad erhöht
+                  {% endif %}
+                {% endif %}
+                {{ vc250.macro_vc250_hk1_states() }}
+
+  # HK1 Temperatur auf Normal-Temperatur setzen
+  hk1_default_temperature:
+    alias: HK1_default_temperature
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Set 424_mixeronecircuitroomtemperaturesetpoint_standard to input_number.vitocal_hk1_normaltemperature"
+    fields:
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: true
+        example: true
+    variables:
+      cur_temp: "{{ states('sensor.1643_mixeronecircuitcurrenttemperaturesetpoint') }}"
+      sta_temp: "{{ states('sensor.424_mixeronecircuitroomtemperaturesetpoint_standard') }}"
+      del_temp: "{{ cur_temp - sta_temp }}"
+    sequence:
+      - if:
+          - condition: template
+            value_template: "{{ (sta_temp | int) != (states('input_number.vitocal_hk1_normaltemperature') | int) }}"
+        then:
+          - service: script.vitocal_set_424_hk1_setpoint
+            data:
+              temperature: "{{ states('input_number.vitocal_hk1_normaltemperature') }}"
+              sendnotify: false
+          - if:
+              - condition: template
+                value_template: "{{ sendnotify }}"
+            then:
+              - service: notify.notify_vitocal_debug
+                data:
+                  title: "Vitocal 250 - hk1_default_temperature"
+                  message: Soll-Temperatur wurde von {{ (cur_temp | float) }} Grad auf Normal-Temperatur ({{ (states('input_number.vitocal_hk1_normaltemperature') | float) + del_temp }} Grad) geändert
+
+  # HK1 Temperatur auf Abschalt-Temperatur setzen
+  hk1_shutdown_temperature:
+    alias: HK1_shutdown_temperature
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Set 424_mixeronecircuitroomtemperaturesetpoint_standard to input_number.vitocal_hk1_shutdowntemperature (PV-Mode)"
+    fields:
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: true
+        example: true
+    sequence:
+      - service: script.vitocal_set_424_hk1_setpoint
+        data:
+          temperature: "{{ states('input_number.vitocal_hk1_shutdowntemperature') }}"
+          sendnotify: "{{ sendnotify }}"
+      - if:
+          - condition: template
+            value_template: "{{ sendnotify }}"
+        then:
+          - service: notify.notify_vitocal_debug
+            data:
+              title: "Vitocal 250 - hk1_shutdown_temperature"
+              message: Temperatur wurde auf {{ (states('input_number.vitocal_hk1_shutdowntemperature') | float) }} Grad reduziert
+
+  # HK1 ausschalten: Temperatur wird auf Abschalt-Temperatur gesetzt
+  hk1_switch_to_off:
+    alias: HK1_Switch_to_off
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Set 1415_mixeronecircuitoperationstate to OFF (PV-Mode)"
+    fields:
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: true
+        example: true
+    sequence:
+      - service: script.vitocal_set_424_hk1_setpoint
+        data:
+          temperature: "{{ states('input_number.vitocal_hk1_shutdowntemperature') }}"
+          sendnotify: false
+      - service: climate.turn_off
+        target:
+          entity_id: climate.open3e_vitocal250a_heizkreis_1
+      - if:
+          - condition: template
+            value_template: "{{ sendnotify }}"
+        then:
+          - service: notify.notify_vitocal_debug
+            data:
+              title: "Vitocal 250 - hk1_switch_to_off"
+              message: |
+                {% import 'vitocal250.jinja' as vc250 with context %}                 
+                "HK1 wurde ausgeschaltet und die Temperatur auf {{ states('input_number.vitocal_hk1_shutdowntemperature') }} Grad gestellt."
+                {{ vc250.macro_current_time() }}
+                {{ vc250.macro_vc250_hk1_states() }}
+
+  # HK1 einschalten: Wenn keine Temperatur angegeben wurde, dann mit Abschalt-Temperatur einschalten
+  hk1_switch_to_on:
+    alias: HK1_Switch_to_on
+    icon: mdi:script-text-outline
+    mode: restart
+    description: "Set 1415_mixeronecircuitoperationstate to AUTO (PV-Mode)"
+    fields:
+      temperature:
+        name: Temperatur
+        description: "Set 424_mixeronecircuitroomtemperaturesetpoint_standard to this value"
+        required: false
+        default: ""
+        example: "20"
+        selector:
+          number:
+            min: 3
+            max: 37
+            step: 1
+            unit_of_measurement: °C
+            mode: slider
+      sendnotify:
+        name: sendnotify
+        description: "Set to true and you will receive a notification"
+        required: false
+        default: true
+        example: true
+    variables:
+      target_temp: >
+        {% if (temperature is defined) %}
+          {{ temperature }}
+        {% else %}
+          {{ states.input_number.vitocal_hk1_shutdowntemperature.state | int }}
+        {% endif %}
+    sequence:
+      - service: climate.turn_on
+        target:
+          entity_id:
+            - climate.open3e_vitocal250a_heizkreis_1
+      - service: script.vitocal_set_424_hk1_setpoint
+        data:
+          temperature: "{{ target_temp }}"
+          sendnotify: false
+      - if:
+          - condition: template
+            value_template: "{{ sendnotify }}"
+        then:
+          - service: notify.notify_vitocal_debug
+            data:
+              title: "Vitocal 250 - hk1_switch_to_on"
+              message: |
+                {% import 'vitocal250.jinja' as vc250 with context %}                 
+                "HK1 wurde eingeschaltet und die Temperatur auf {{ target_temp }} Grad gestellt."
+                {{ vc250.macro_current_time() }}
+                {{ vc250.macro_vc250_hk1_states() }}

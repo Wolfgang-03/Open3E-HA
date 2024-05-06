@@ -5,7 +5,7 @@ mqtt:
       object_id: open3e_hk1pumpe
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -17,21 +17,69 @@ mqtt:
       state_topic: "open3e/680_1102_MixerOneCircuitPumpMinimumMaximumLimit/Setpoint"
       command_topic: "open3e/cmnd"
       # MinSpeed = $14 = #20
-      # MaxSpeed = $64 = #100
+      # MaxSpeed = value   // ($64 = #100)
       # Setpoint = value
       command_template: >
         {% set intvalue = value | int %}
-        {% set cmddata = '1464' + '%0x' % intvalue %}
+        {% set cmddata = '14' + '%0x' % intvalue + '%0x' % intvalue %}
         {% set cmd = {'mode': 'write-raw', 'data': [[1102, cmddata]]} %}
         {{ cmd | to_json }}
       icon: mdi:pump
+
+    - name: "Heizkreis 1 Vorlauftemperatur Minimal"
+      unique_id: open3e_Heizkreis1_Vorlauf_Minimal
+      object_id: open3e_hk1vorlaufminimal
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: temperature
+      min: 10
+      max: 60
+      step: 1
+      unit_of_measurement: "°C"
+      state_topic: "open3e/680_1192_MixerOneCircuitFlowTemperatureMinimumMaximumLimit/Minimum"
+      command_topic: "open3e/cmnd"
+      command_template: >
+        {% set flowmax = min(max(states('sensor.1192_mixeronecircuitflowtemperature_maximum') | int * 10,100),600) %}
+        {% set flowmin = min(max(value*10 | int, 100), flowmax) %}
+        {% set cmddata = '%02x' % (flowmin % 256) + '%02x' % (flowmin // 256) + '%02x' % (flowmax % 256) + '%02x' % (flowmax // 256) + '000000000000' %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[1192, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:thermometer
+
+    - name: "Heizkreis 1 Vorlauftemperatur Maximal"
+      unique_id: open3e_Heizkreis1_Vorlauf_Maximal
+      object_id: open3e_hk1vorlaufmaximal
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: temperature
+      min: 10
+      max: 60
+      step: 1
+      unit_of_measurement: "°C"
+      state_topic: "open3e/680_1192_MixerOneCircuitFlowTemperatureMinimumMaximumLimit/Maximum"
+      command_topic: "open3e/cmnd"
+      command_template: >
+        {% set flowmin = min(max(states('sensor.1192_mixeronecircuitflowtemperature_minimum') | int * 10,100),600) %}
+        {% set flowmax = min(max(value*10 | int, flowmin), 600) %}
+        {% set cmddata = '%02x' % (flowmin % 256) + '%02x' % (flowmin // 256) + '%02x' % (flowmax % 256) + '%02x' % (flowmax // 256) + '000000000000' %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[1192, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:thermometer
 
     - name: "Heizkreis 2 Pumpe"
       unique_id: open3e_Heizkreis2_Pumpe
       object_id: open3e_hk2pumpe
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -52,12 +100,35 @@ mqtt:
         {{ cmd | to_json }}
       icon: mdi:pump
 
+    - name: "Max. Leistung elektrische Zusatzheizung"
+      unique_id: 680_2626_open3e_MaximumPowerElectricalHeater
+      object_id: 2626_maximumpowerelectricalheater
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+        suggested_area: "Heizung"
+      device_class: power
+      min: 0
+      max: 8000
+      step: 1000
+      unit_of_measurement: "W"
+      state_topic: "open3e/680_2626_MaximumPowerElectricalHeater"
+      command_topic: "open3e/cmnd"
+      command_template: >
+        {% set intvalue = value | int %}
+        {% set cmddata = '%02x' % (intvalue % 256) + '%02x' % (intvalue // 256) + '0000' %}
+        {% set cmd = {'mode': 'write-raw', 'data': [[2626, cmddata]]} %}
+        {{ cmd | to_json }}
+      icon: mdi:water-boiler
+
   climate:
     - name: Heizkreis 1
       unique_id: open3e_heizkreis1
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -66,6 +137,7 @@ mqtt:
         - "auto"
       min_temp: 3
       max_temp: 37
+      # Schalter HK1 Betriebsprogramm (Auto / Off)
       mode_state_topic: "open3e/680_1415_MixerOneCircuitOperationState/Mode/ID"
       mode_state_template: "{{'off' if value_json == 0 else 'auto'}}"
       mode_command_topic: "open3e/cmnd"
@@ -80,6 +152,7 @@ mqtt:
         {% set values = { '1':'0102', '0':'0000'} %}
         {% set cmd = {'mode': 'write-raw', 'data':[[1415, values[value]]]} %}
         {{ cmd | to_json }}
+      # Einstellung HK1 Solltemperatur (3 .. 37 Grad)
       temperature_state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
       temperature_command_topic: "open3e/cmnd"
       temperature_command_template: >
@@ -101,6 +174,7 @@ mqtt:
         {% set cmddata = '%02x' % (value_com % 256) + '%02x' % (value_com // 256) + '%02x' % (value_sta % 256) + '%02x' % (value_sta // 256) + '%02x' % (value_red % 256) + '%02x' % (value_red // 256) + '000000' %}
         {% set cmd = {'mode': 'write-raw', 'data':[[424, cmddata]]} %}
         {{ cmd | to_json }}
+      # Anzeige aktuelle Temperatur
       current_temperature_topic: "zigbee2mqtt/Heizung Wohnzimmer"
       current_temperature_template: >
         {{ state_attr('climate.heizung_wohnzimmer', 'current_temperature') }}
@@ -111,7 +185,7 @@ mqtt:
       unique_id: open3e_heizkreis2
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -164,7 +238,7 @@ mqtt:
       object_id: 2442_HeatPumpFrostProtection
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -179,7 +253,7 @@ mqtt:
       object_id: 2855_MixerOneCircuitFrostProtectionConfiguration
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_off: "0.0"
@@ -192,7 +266,7 @@ mqtt:
       object_id: 401_MixerOneCircuitPump
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_off: "0.0"
@@ -206,7 +280,7 @@ mqtt:
       object_id: 2856_MixerTwoCircuitFrostProtectionConfiguration
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_off: "0.0"
@@ -219,7 +293,7 @@ mqtt:
       object_id: 402_MixerTwoCircuitPump
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_off: "0.0"
@@ -233,7 +307,7 @@ mqtt:
       object_id: 2351_heatpumpcompressor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_off: "0.0"
@@ -247,23 +321,22 @@ mqtt:
       object_id: 2352_additionalelectricheater
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       payload_on: "0100"
       payload_off: "0000"
-      value_template: "{{ value_json.state }}"
       icon: mdi:power
 
   sensor:
     # Vitocal 250 - Allgemein
-    - name: "Vitocal Vorlauftemperatur"
+    - name: "Vitocal Vorlauftemperatur Istwert"
       state_topic: "open3e/680_268_FlowTemperatureSensor/Actual"
       unique_id: 680_268_FlowTemperatureSensor
       object_id: 268_flowtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
         suggested_area: "Heizung"
@@ -278,7 +351,7 @@ mqtt:
       object_id: 269_returntemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -292,7 +365,7 @@ mqtt:
       object_id: 274_outsidetemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -306,7 +379,7 @@ mqtt:
       object_id: 318_waterpressuresensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: pressure
@@ -320,7 +393,7 @@ mqtt:
       object_id: 320_primaryheatexchangerliquidtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -334,7 +407,7 @@ mqtt:
       object_id: 355_secondaryheatexchangerliquidtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -348,10 +421,24 @@ mqtt:
       object_id: 381_centralheatingpump
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
+      state_class: measurement
+      icon: mdi:pump
+      unit_of_measurement: "%"
+
+    - name: "Vitocal Primärpumpe Status"
+      state_topic: "open3e/680_2791_CentralHeatingPumpStatus"
+      unique_id: 680_2791_CentralHeatingPumpStatus
+      object_id: 2791_centralheatingpumpstatus
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: power_factor
       state_class: measurement
       icon: mdi:pump
       unit_of_measurement: "%"
@@ -362,7 +449,7 @@ mqtt:
       object_id: 389_electronicexpansionvalveonecurrentpositionpercent
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -375,7 +462,7 @@ mqtt:
       object_id: 391_electronicexpansionvalvetwocurrentpositionpercent
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -388,7 +475,7 @@ mqtt:
       object_id: 901_servicemanagerisrequired
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:account-wrench
@@ -399,7 +486,7 @@ mqtt:
       object_id: 902_malfunctionidentification
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:file-document-alert
@@ -410,51 +497,12 @@ mqtt:
       object_id: 1043_allengrasensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
       icon: mdi:gauge
       unit_of_measurement: "m³/h"
-
-    - name: "Vitocal Primärpumpe Minimalbegrenzung"
-      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/MinSpeed"
-      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_MinSpeed
-      object_id: 1100_centralheatingpumpminimummaximumlimitminspeed
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
-    - name: "Vitocal Primärpumpe Maximalbegrenzung"
-      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/MaxSpeed"
-      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_MaxSpeed
-      object_id: 1100_centralheatingpumpminimummaximumlimitmaxspeed
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
-    - name: "Vitocal Primärpumpe Standardwert"
-      state_topic: "open3e/680_1100_CentralHeatingPumpMinimumMaximumLimit/Setpoint"
-      unique_id: 680_1100_CentralHeatingPumpMinimumMaximumLimit_Setpoint
-      object_id: 1100_centralheatingpumpminimummaximumlimitsetpoint
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
 
     - name: "Vitocal Primäre Einlauftemperatur"
       state_topic: "open3e/680_1769_PrimaryInletTemperatureSensor/Actual"
@@ -462,7 +510,7 @@ mqtt:
       object_id: 1769_primaryinlettemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -476,7 +524,7 @@ mqtt:
       object_id: 1770_secondaryoutlettemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -490,7 +538,7 @@ mqtt:
       object_id: 1771_engineroomtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -504,10 +552,10 @@ mqtt:
       object_id: 1775_primarycircuitfanone
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:fan
       unit_of_measurement: "%"
 
@@ -517,10 +565,10 @@ mqtt:
       object_id: 1776_primarycircuitfantwo
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:fan
       unit_of_measurement: "%"
 
@@ -530,8 +578,8 @@ mqtt:
       object_id: 2333_economizerliquidtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann" 
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
       device_class: temperature
@@ -544,7 +592,7 @@ mqtt:
       object_id: 2350_energymanagmentsystemresultingcontrolstate
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:home-variant
@@ -568,7 +616,7 @@ mqtt:
       object_id: 2334_evaporatorvaportemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       state_class: measurement
@@ -582,7 +630,7 @@ mqtt:
       object_id: 2488_currentelectricalpowerconsumptionsystem
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: power
@@ -596,7 +644,7 @@ mqtt:
       object_id: 2496_currentthermalcapacitysystem
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: power
@@ -610,7 +658,7 @@ mqtt:
       object_id: 3016_heatingbuffertemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -624,7 +672,7 @@ mqtt:
       object_id: 2256_desiredthermalenergydefrost
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: power
@@ -638,7 +686,7 @@ mqtt:
       object_id: 2735_fourthreewayvalvevalvecurrentposition
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:valve
@@ -652,7 +700,7 @@ mqtt:
       object_id: 271_domestichotwatersensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -666,7 +714,7 @@ mqtt:
       object_id: 396_domestichotwatertemperaturesetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -674,53 +722,14 @@ mqtt:
       icon: mdi:thermometer
       unit_of_measurement: "°C"
 
-    - name: "Vitocal Warmwasser Pumpe Minimalbegrenzung"
-      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/MinSpeed"
-      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_MinSpeed
-      object_id: 1101_domestichotwaterpumpminimummaximumlimitminspeed
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
-    - name: "Vitocal Warmwasser Pumpe Maximalbegrenzung"
-      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/MaxSpeed"
-      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_MaxSpeed
-      object_id: 1101_domestichotwaterpumpminimummaximumlimitmaxspeed
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
-    - name: "Vitocal Warmwasser Pumpe Standardwert"
-      state_topic: "open3e/680_1101_DomesticHotWaterPumpMinimumMaximumLimit/Setpoint"
-      unique_id: 680_1101_DomesticHotWaterPumpMinimumMaximumLimit_Setpoint
-      object_id: 1101_domestichotwaterpumpminimummaximumlimitsetpoint
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
     # Vitocal 250 - Heizkreis 1
-    - name: "Vitocal HK1 Vorlauftemperatur"
+    - name: "Vitocal HK1 Vorlauftemperatur Istwert"
       state_topic: "open3e/680_284_MixerOneCircuitFlowTemperatureSensor/Actual"
       unique_id: 680_284_MixerOneCircuitFlowTemperatureSensor
       object_id: 284_mixeronecircuitflowtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -734,12 +743,12 @@ mqtt:
       object_id: 475_mixeronecircuitthreewayvalvepositionpercent
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:valve
-      value_template: >
-        {{ float(value) / 100 }}
+      #value_template: >
+      #  {{ float(value) / 100 }}
 
     - name: "Vitocal HK1 Vorlauftemperatur Sollwert"
       state_topic: "open3e/680_987_MixerOneCircuitFlowTemperatureTargetSetpoint"
@@ -747,7 +756,7 @@ mqtt:
       object_id: 987_mixeronecircuitflowtemperaturetargetsetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -761,10 +770,10 @@ mqtt:
       object_id: 1102_mixeronecircuitpumpminimummaximumlimitminspeed
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -774,10 +783,10 @@ mqtt:
       object_id: 1102_mixeronecircuitpumpminimummaximumlimitmaxspeed
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -787,12 +796,38 @@ mqtt:
       object_id: 1102_mixeronecircuitpumpminimummaximumlimitsetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
+
+    - name: "Vitocal HK1 Temperatur Minimum"
+      state_topic: "open3e/680_1192_MixerOneCircuitFlowTemperatureMinimumMaximumLimit/Minimum"
+      unique_id: 680_1192_MixerOneCircuitFlowTemperature_Minimum
+      object_id: 1192_mixeronecircuitflowtemperature_minimum
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer
+
+    - name: "Vitocal HK1 Temperatur Maximum"
+      state_topic: "open3e/680_1192_MixerOneCircuitFlowTemperatureMinimumMaximumLimit/Maximum"
+      unique_id: 680_1192_MixerOneCircuitFlowTemperature_Maximum
+      object_id: 1192_mixeronecircuitflowtemperature_maximum
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer
 
     - name: "Vitocal HK1 Pumpe Status"
       state_topic: "open3e/680_2792_MixerOneCircuitPumpStatus"
@@ -800,24 +835,10 @@ mqtt:
       object_id: 2792_mixeronecircuitpumpstatus
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
-      icon: mdi:pump
-      unit_of_measurement: "%"
-
-    - name: "Vitocal Primärpumpe Status"
-      state_topic: "open3e/680_2791_CentralHeatingPumpStatus"
-      unique_id: 680_2791_CentralHeatingPumpStatus
-      object_id: 2791_centralheatingpumpstatus
-      device:
-        name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
-        manufacturer: "Viessmann"
-        model: "Vitocal 250-A"
-      device_class: speed
-      state_class: measurement
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -827,7 +848,7 @@ mqtt:
       object_id: 1415_mixeronecircuitoperationstate
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:home-variant
@@ -855,13 +876,13 @@ mqtt:
           {{ value }}
         {% endif %}
 
-    - name: "Vitocal HK1 Komfort-Temperatur"
+    - name: "Vitocal HK1 Raumtemperatur Komfort"
       state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Comfort"
       unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Comfort
       object_id: 424_mixeronecircuitroomtemperaturesetpoint_comfort
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -869,13 +890,13 @@ mqtt:
       icon: mdi:thermometer
       unit_of_measurement: "°C"
 
-    - name: "Vitocal HK1 Normal-Temperatur"
+    - name: "Vitocal HK1 Raumtemperatur Standard"
       state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Standard"
       unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Standard
       object_id: 424_mixeronecircuitroomtemperaturesetpoint_standard
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -883,13 +904,13 @@ mqtt:
       icon: mdi:thermometer
       unit_of_measurement: "°C"
 
-    - name: "Vitocal HK1 Reduziert-Temperatur"
+    - name: "Vitocal HK1 Raumtemperatur Reduziert"
       state_topic: "open3e/680_424_MixerOneCircuitRoomTemperatureSetpoint/Reduced"
       unique_id: 680_424_MixerOneCircuitRoomTemperatureSetpoint_Reduced
       object_id: 424_mixeronecircuitroomtemperaturesetpoint_reduced
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -897,13 +918,13 @@ mqtt:
       icon: mdi:thermometer
       unit_of_measurement: "°C"
 
-    - name: "Vitocal HK1 Solltemperatur"
+    - name: "Vitocal HK1 aktuelle Raumtemperatur Sollwert"
       state_topic: "open3e/680_1643_MixerOneCircuitCurrentTemperatureSetpoint"
       unique_id: 680_1643_MixerOneCircuitCurrentTemperatureSetpoint
       object_id: 1643_mixeronecircuitcurrenttemperaturesetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -912,13 +933,13 @@ mqtt:
       unit_of_measurement: "°C"
 
     # Vitocal 250 - Heizkreis 2
-    - name: "Vitocal HK2 Vorlauftemperatur"
+    - name: "Vitocal HK2 Vorlauftemperatur Istwert"
       state_topic: "open3e/680_286_MixerTwoCircuitFlowTemperatureSensor/Actual"
       unique_id: 680_286_MixerTwoCircuitFlowTemperatureSensor
       object_id: 286_mixertwocircuitflowtemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -932,7 +953,7 @@ mqtt:
       object_id: 426_mixermwocircuitroomtemperaturesetpoint_comfort
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -946,7 +967,7 @@ mqtt:
       object_id: 426_mixermwocircuitroomtemperaturesetpoint_standard
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -960,7 +981,7 @@ mqtt:
       object_id: 426_mixermwocircuitroomtemperaturesetpoint_reduced
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -974,7 +995,7 @@ mqtt:
       object_id: 476_mixertwocircuitthreewayvalvepositionpercent
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:valve
@@ -987,7 +1008,7 @@ mqtt:
       object_id: 988_mixertwocircuitflowtemperaturetargetsetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -1001,10 +1022,10 @@ mqtt:
       object_id: 1103_mixertwocircuitpumpminimummaximumlimitminspeed
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -1014,10 +1035,10 @@ mqtt:
       object_id: 1103_mixertwocircuitpumpminimummaximumlimitmaxspeed
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -1027,12 +1048,38 @@ mqtt:
       object_id: 1103_mixertwocircuitpumpminimummaximumlimitsetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
+
+    - name: "Vitocal HK2 Temperatur Minimum"
+      state_topic: "open3e/680_1193_MixerTwoCircuitFlowTemperatureMinimumMaximumLimit/Minimum"
+      unique_id: 680_1193_MixerTwoCircuitFlowTemperature_Minimum
+      object_id: 1193_mixertwocircuitflowtemperature_minimum
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer
+
+    - name: "Vitocal HK2 Temperatur Maximum"
+      state_topic: "open3e/680_1193_MixerTwoCircuitFlowTemperatureMinimumMaximumLimit/Maximum"
+      unique_id: 680_1193_MixerTwoCircuitFlowTemperature_Maximum
+      object_id: 1193_mixertwocircuitflowtemperature_maximum
+      device:
+        name: "Open3e_Vitocal250A"
+        identifiers: !secret vitocal_sn
+        manufacturer: "Viessmann"
+        model: "Vitocal 250-A"
+      device_class: temperature
+      unit_of_measurement: "°C"
+      icon: mdi:thermometer
 
     - name: "Vitocal HK2 Pumpe Status"
       state_topic: "open3e/680_2793_MixerTwoCircuitPumpStatus"
@@ -1040,10 +1087,10 @@ mqtt:
       object_id: 2793_mixertwocircuitpumpstatus
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:pump
       unit_of_measurement: "%"
 
@@ -1053,7 +1100,7 @@ mqtt:
       object_id: 1416_mixertwocircuitoperationstate
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:home-variant
@@ -1081,13 +1128,13 @@ mqtt:
           {{ value }}
         {% endif %}
 
-    - name: "Vitocal HK2 Solltemperatur"
+    - name: "Vitocal HK2 Raumtemperatur Sollwert"
       state_topic: "open3e/680_1644_MixerTwoCircuitCurrentTemperatureSetpoint"
       unique_id: 680_1644_MixerTwoCircuitCurrentTemperatureSetpoint
       object_id: 1644_mixertwocircuitcurrenttemperaturesetpoint
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -1102,7 +1149,7 @@ mqtt:
       object_id: 321_compressorinlettemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -1116,7 +1163,7 @@ mqtt:
       object_id: 322_compressorinletpressuresensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: pressure
@@ -1130,7 +1177,7 @@ mqtt:
       object_id: 324_compressoroutlettemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -1144,7 +1191,7 @@ mqtt:
       object_id: 325_compressoroutletpressuresensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: pressure
@@ -1158,7 +1205,7 @@ mqtt:
       object_id: 1772_compressoroiltemperaturesensor
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: temperature
@@ -1172,10 +1219,10 @@ mqtt:
       object_id: 2346_compressorspeedpercent
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       state_class: measurement
       icon: mdi:fan
       unit_of_measurement: "%"
@@ -1187,7 +1234,7 @@ mqtt:
       object_id: 2369_heatpumpcompressorstatistical_starts
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:counter
@@ -1199,7 +1246,7 @@ mqtt:
       object_id: 2369_heatpumpcompressorstatistical_hours
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:store-clock
@@ -1210,13 +1257,14 @@ mqtt:
       object_id: 2569_compressorspeedrps
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
-      device_class: speed
+      device_class: power_factor
       icon: mdi:fan
-      unit_of_measurement: "rps"
+      unit_of_measurement: "%"
 
+    # Vitocal 250 - Elektrische Zusatzheizung
     - name: "Vitocal Zusatzheizung Starts"
       state_topic: "open3e/680_2370_AdditionalElectricHeaterStatistical/starts"
       state_class: total_increasing
@@ -1224,7 +1272,7 @@ mqtt:
       object_id: 2370_additionalelectricheaterstatistical_starts
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:counter
@@ -1236,7 +1284,7 @@ mqtt:
       object_id: 2370_additionalelectricheaterstatistical_hours
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       icon: mdi:store-clock
@@ -1247,7 +1295,7 @@ mqtt:
       object_id: 2487_currentelectricalpowerconsumptionelectricheater
       device:
         name: "Open3e_Vitocal250A"
-        identifiers: "S/N 1234567890123456"
+        identifiers: !secret vitocal_sn
         manufacturer: "Viessmann"
         model: "Vitocal 250-A"
       device_class: power
@@ -1267,16 +1315,92 @@ template:
           {% if (elect_power <= 0) or (therm_power<=0) %}
           {{ float("0.0") }}
           {% else %}
-          {{ min(float(therm_power / elect_power),8) | round(2) }}
+          {{ min(float(therm_power / elect_power),10) | round(2) }}
           {% endif %}
 
-      - name: "Vitocal Vorlauftemperatur Delta"
+      - name: "Vitocal HK1 Vorlauftemperatur Delta"
         unique_id: open3e_MixerOneCircuitFlowTemperatureDelta
         state_class: measurement
+        unit_of_measurement: "°C"
         icon: mdi:sine-wave
         state: >
           {% set flow_target = states('sensor.987_mixeronecircuitflowtemperaturetargetsetpoint') | float %}
           {% set flow_sensor = states('sensor.284_mixeronecircuitflowtemperaturesensor') | float %}
           {{ float(flow_target - flow_sensor) | round(2) }}
+        attributes:
+          target_reached: >
+            {% set flow_target = states('sensor.987_mixeronecircuitflowtemperaturetargetsetpoint') | float %}
+            {% set flow_sensor = states('sensor.284_mixeronecircuitflowtemperaturesensor') | float %}
+            {{ (float(flow_target - flow_sensor) < 0.2) }}
+
+      - name: "Vitocal HK2 Vorlauftemperatur Delta"
+        unique_id: open3e_MixerTwoCircuitFlowTemperatureDelta
+        state_class: measurement
+        unit_of_measurement: "°C"
+        icon: mdi:sine-wave
+        state: >
+          {% set flow_target = states('sensor.988_mixertwocircuitflowtemperaturetargetsetpoint') | float %}
+          {% set flow_sensor = states('sensor.286_mixertwocircuitflowtemperaturesensor') | float %}
+          {{ float(flow_target - flow_sensor) | round(2) }}
+        attributes:
+          target_reached: >
+            {% set flow_target = states('sensor.988_mixertwocircuitflowtemperaturetargetsetpoint') | float %}
+            {% set flow_sensor = states('sensor.286_mixertwocircuitflowtemperaturesensor') | float %}
+            {{ float(flow_target - flow_sensor) < 0.2 }}
+
+input_number:
+  vitocal_hk1_shutdowntemperature:
+    name: Vitocal HK1 abgesenkte Temperatur
+    min: 5
+    max: 22
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
+
+  vitocal_hk1_normaltemperature:
+    name: Vitocal HK1 Normaltemperatur
+    min: 15
+    max: 37
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
+
+  vitocal_hk1_max_pv_temperature:
+    name: Vitocal HK1 maximale Temperatur im PV-Modus
+    min: 22
+    max: 37
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
+
+  vitocal_hk2_shutdowntemperature:
+    name: Vitocal HK2 abgesenkte Temperatur
+    min: 5
+    max: 22
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
+
+  vitocal_hk2_normaltemperature:
+    name: Vitocal HK2 Normaltemperatur
+    min: 15
+    max: 37
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
+
+  vitocal_hk2_max_pv_temperature:
+    name: Vitocal HK2 maximale Temperatur im PV-Modus
+    min: 22
+    max: 37
+    step: 1
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: slider
 
 
